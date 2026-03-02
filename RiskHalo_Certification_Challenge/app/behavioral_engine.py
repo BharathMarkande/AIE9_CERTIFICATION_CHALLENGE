@@ -1,16 +1,22 @@
-# riskhalo/app/behavioral_engine.py
-
 import numpy as np
 
 
 class BehavioralEngine:
     """
-    Diagnoses behavioral distortion by comparing performance
-    in emotionally neutral trades versus post-loss trades.
+    BehavioralEngine diagnoses emotional execution distortion by comparing
+    performance in neutral trades versus trades placed immediately after losses.
 
-    It quantifies expectancy shifts, win-size shrinkage,
-    loss-size expansion, and classifies the trader's
-    behavioral state using deterministic thresholds.
+    It detects:
+    - Expectancy deterioration
+    - Win-size contraction
+    - Loss-size expansion
+
+    The engine supports confidence tiers to ensure statistical integrity:
+        - HIGH: Sufficient data in both groups (>= 2 trades each)
+        - LOW: Limited sample size
+        - NO_POST_LOSS_DATA: No post-loss trades present
+
+    The engine always returns structured output and never fails ingestion.
     """
 
     def __init__(self, df):
@@ -19,43 +25,75 @@ class BehavioralEngine:
         if "post_loss_flag" not in self.df.columns:
             raise ValueError("FeatureEngine must be run before BehavioralEngine.")
 
+        self.analysis_confidence = "HIGH"
+
     # --------------------------------------------------
     # Split Groups
     # --------------------------------------------------
     def split_groups(self):
         """
-        Segments trades into two behavioral contexts:
+        Segments trades into behavioral contexts:
 
-        - Normal state: trades not immediately following a loss
-        - Post-loss state: trades occurring immediately after a loss
+        - Normal trades (post_loss_flag == 0)
+        - Post-loss trades (post_loss_flag == 1)
 
-        This separation enables conditional performance comparison,
-        which is the foundation of distortion detection.
+        Determines statistical confidence tier:
+
+        HIGH:
+            Both groups contain >= 2 trades.
+
+        LOW:
+            One group contains fewer than 2 trades.
+
+        NO_POST_LOSS_DATA:
+            No post-loss trades exist, making distortion comparison impossible.
+
+        This method never raises exceptions and prepares the engine
+        for safe downstream metric computation.
         """
 
         self.normal_df = self.df[self.df["post_loss_flag"] == 0]
         self.post_df = self.df[self.df["post_loss_flag"] == 1]
 
-        if len(self.normal_df) < 3 or len(self.post_df) < 3:
-            raise ValueError("Not enough trades in one of the groups for reliable analysis.")
+        normal_count = len(self.normal_df)
+        post_count = len(self.post_df)
+
+        #No post-loss data
+        if post_count == 0:
+            self.analysis_confidence = "NO_POST_LOSS_DATA"
+
+        #Limited data
+        elif normal_count < 2 or post_count < 2:
+            self.analysis_confidence = "LOW"
+
+        #Otherwise HIGH
+        else:
+            self.analysis_confidence = "HIGH"
 
     # --------------------------------------------------
     # Compute Group Metrics
     # --------------------------------------------------
     def compute_metrics(self):
         """
-        Computes core performance statistics for both groups:
+        Computes core performance statistics separately for
+        normal and post-loss trade groups.
 
-        - Average R (risk-normalized performance)
+        Metrics calculated:
+        - Average R (risk-normalized expectancy)
         - Average winning R
         - Average losing R
         - Win rate
 
-        These metrics allow us to compare whether behavior
-        changes after emotional triggers (loss events).
+        Handles empty groups safely by returning zeros.
+
+        These metrics form the quantitative basis
+        for behavioral distortion analysis.
         """
 
         def group_stats(group):
+
+            if len(group) == 0:
+                return 0, 0, 0, 0
 
             avg_R = group["R_proxy"].mean()
 
@@ -84,22 +122,26 @@ class BehavioralEngine:
         ) = group_stats(self.post_df)
 
     # --------------------------------------------------
-    # Compute Distortion Metrics
+    # Compute Distortions
     # --------------------------------------------------
     def compute_distortions(self):
         """
-        Calculates percentage change in performance between
-        normal trades and post-loss trades.
+        Quantifies behavioral distortion magnitude by measuring
+        percentage change between normal and post-loss metrics.
 
-        Measures:
-        - R_drop_percent: overall performance deterioration
-        - win_shrink_percent: reduction in average win size
-        - loss_expansion_percent: increase in average loss size
+        Distortion Components:
+        - R_drop_percent:
+            Overall expectancy deterioration.
+        - win_shrink_percent:
+            Reduction in average winning size.
+        - loss_expansion_percent:
+            Increase in average loss size.
 
-        These metrics quantify behavioral distortion magnitude.
+        Safely handles division-by-zero cases.
+
+        These metrics express emotional distortion intensity.
         """
 
-        # Avoid division by zero
         self.R_drop_percent = (
             (self.avg_R_normal - self.avg_R_post) / abs(self.avg_R_normal)
             if self.avg_R_normal != 0 else 0
@@ -121,18 +163,30 @@ class BehavioralEngine:
     def classify_behavior(self):
         """
         Classifies the trader's behavioral state using
-        deterministic thresholds (default 25%).
-        
+        deterministic thresholds.
+
         Possible states:
-        - STABLE: No meaningful distortion detected
-        - CONFIDENCE_CONTRACTION: Wins shrink after losses
-        - LOSS_ESCALATION: Losses expand after losses
-        - ADAPTIVE_RECOVERY: Performance improves post-loss
-        
-        This converts statistical shifts into interpretable states.
+        - STABLE:
+            No meaningful distortion detected.
+        - CONFIDENCE_CONTRACTION:
+            Win size shrinks after losses.
+        - LOSS_ESCALATION:
+            Loss size expands after losses.
+        - ADAPTIVE_RECOVERY:
+            Performance improves post-loss.
+        - INSUFFICIENT_POST_LOSS_DATA:
+            No comparison possible.
+
+        Converts statistical shifts into psychologically
+        interpretable execution states.
         """
 
-        threshold = 0.25  # 25% distortion threshold
+        threshold = 0.25
+
+        # If no post-loss data, no distortion comparison possible
+        if self.analysis_confidence == "NO_POST_LOSS_DATA":
+            self.behavioral_state = "INSUFFICIENT_POST_LOSS_DATA"
+            return
 
         if self.avg_R_post > self.avg_R_normal:
             self.behavioral_state = "ADAPTIVE_RECOVERY"
@@ -147,19 +201,30 @@ class BehavioralEngine:
             self.behavioral_state = "STABLE"
 
     # --------------------------------------------------
-    # Compute Severity Score
+    # Compute Severity
     # --------------------------------------------------
     def compute_severity(self):
         """
-        Computes a normalized severity score (0-1) representing
-        the magnitude of behavioral distortion.
+        Computes normalized severity score (0–1) representing
+        emotional distortion magnitude.
 
-        averages positive distortion components while
-        ignoring improvements.
+        Severity is calculated as the mean of positive
+        distortion components:
+        - R_drop_percent
+        - win_shrink_percent
+        - loss_expansion_percent
 
-        Higher severity indicates stronger emotional impact
-        on execution quality.
+        Improvements are ignored (only deterioration counted).
+
+        LOW confidence reduces severity by 50%
+        to avoid overfitting small samples.
+
+        NO_POST_LOSS_DATA results in zero severity.
         """
+
+        if self.analysis_confidence == "NO_POST_LOSS_DATA":
+            self.severity_score = 0
+            return
 
         components = [
             max(0, self.R_drop_percent),
@@ -167,22 +232,39 @@ class BehavioralEngine:
             max(0, self.loss_expansion_percent),
         ]
 
-        self.severity_score = min(1, np.mean(components))
+        severity = min(1, np.mean(components))
+
+        # Damp severity if LOW confidence
+        if self.analysis_confidence == "LOW":
+            severity *= 0.5
+
+        self.severity_score = severity
 
     # --------------------------------------------------
     # Run Full Diagnosis
     # --------------------------------------------------
     def run(self):
         """
-        Executes the full behavioral diagnosis pipeline:
-        1. Segment trades by emotional state
+        Executes full behavioral diagnosis pipeline:
+
+        1. Segment trades by emotional context
         2. Compute group performance metrics
         3. Quantify distortion percentages
         4. Classify behavioral state
-        5. Compute severity score
-        
-        Returns a structured diagnosis dictionary used
-        by the Expectancy Engine and downstream agents.
+        5. Compute confidence-adjusted severity
+
+        Returns
+        -------
+        dict
+            Structured behavioral diagnosis including:
+            - behavioral_state
+            - severity_score
+            - analysis_confidence
+            - group-level metrics
+            - distortion percentages
+
+        This output feeds the ExpectancyEngine,
+        RuleComplianceEngine, and downstream coaching agents.
         """
 
         self.split_groups()
@@ -194,6 +276,7 @@ class BehavioralEngine:
         return {
             "behavioral_state": self.behavioral_state,
             "severity_score": round(self.severity_score, 3),
+            "analysis_confidence": self.analysis_confidence,
 
             "avg_R_normal": round(self.avg_R_normal, 3),
             "avg_R_post": round(self.avg_R_post, 3),

@@ -59,10 +59,10 @@ def _normalize_trade_excel(df: pd.DataFrame, column_map: dict) -> pd.DataFrame:
 
 
 _COLUMN_MAP = {
-    "Buy Qty.": "Buy Qty",
-    "Avg. Buy Price": "Avg Buy Price",
-    "Sell Qty.": "Sell Qty",
-    "Avg. Sell Price": "Avg Sell Price",
+    "Buy Qty": "Buy Qty",
+    "Avg Buy Price": "Avg Buy Price",
+    "Sell Qty": "Sell Qty",
+    "Avg Sell Price": "Avg Sell Price",
 }
 
 

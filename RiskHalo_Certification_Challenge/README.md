@@ -1,6 +1,6 @@
-# RiskHalo Certification Challenge
+# AIE09 Certification Challenge
 
-RiskHalo Certification Challenge application for trading psychology and risk management coaching.
+# RiskHalo - A Behavioral Risk Intelligence Engine for Intraday Traders
 
 ## Project Structure
 
@@ -20,7 +20,6 @@ RiskHalo_Certification_Challenge/
 │   ├── retriever.py        # Semantic retrieval
 │
 ├── agents/                 # Agentic RAG Layer
-│   ├── guardrail_agent.py  # Safety and compliance guardrails
 │   ├── coach_agent.py      # Coaching and guidance agent
 │
 ├── evaluation/              # RAGAS Evaluation Layer
@@ -38,14 +37,10 @@ RiskHalo_Certification_Challenge/
 
 1. Install dependencies:
    ```bash
-   pip install -r requirements.txt
+   uv sync
    ```
 
 2. Run the Streamlit app:
    ```bash
    streamlit run ui/streamlit_app.py
    ```
-
-## License
-
-Proprietary - RiskHalo Certification Challenge

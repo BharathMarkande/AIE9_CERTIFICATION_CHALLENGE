@@ -1,7 +1,6 @@
-# riskhalo/app/session_summary_builder.py
-
 from datetime import datetime
-import uuid
+from app.expectancy_engine import format_expectancy_summary
+import hashlib
 
 
 class SessionSummaryBuilder:
@@ -14,24 +13,35 @@ class SessionSummaryBuilder:
     - Metadata (retrieval filtering)
 
     It represents a single time-stamped behavioral checkpoint
-    in the trader’s performance evolution.
+    in the trader's performance evolution.
     """
 
-    def __init__(self, behavioral_output: dict, expectancy_output: dict, total_trades: int):
+    def __init__(self, feature_df, behavioral_output: dict, expectancy_output: dict, rule_results: dict):
+        self.df = feature_df
         self.behavior = behavioral_output
         self.expectancy = expectancy_output
-        self.total_trades = total_trades
+        self.rules = rule_results
+        self.total_trades = len(feature_df)
 
     # --------------------------------------------------
     # Generate Unique Session ID
     # --------------------------------------------------
     def generate_session_id(self):
         """
-        Generates a unique identifier for the current analysis session.
+        Generates deterministic session ID based on trade data content.
+
+        Identical uploads → identical session_id.
+        Prevents duplicate vector entries.
         """
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        unique_suffix = str(uuid.uuid4())[:8]
-        return f"session_{timestamp}_{unique_suffix}"
+
+        # Ensure consistent ordering
+        df_sorted = self.df.sort_values(by=list(self.df.columns))
+
+        content_string = df_sorted.to_csv(index=False)
+
+        content_hash = hashlib.md5(content_string.encode()).hexdigest()[:12]
+
+        return f"session_{content_hash}"
 
     # --------------------------------------------------
     # Build Structured Snapshot (JSON)
@@ -70,18 +80,100 @@ class SessionSummaryBuilder:
             "expectancy_post_R": self.expectancy["expectancy_post_R"],
             "expectancy_delta_R": self.expectancy["expectancy_delta_R"],
 
-            "economic_impact_rupees": self.expectancy["economic_impact_rupees"],
-            "simulated_rupee_improvement": self.expectancy["simulated_rupee_improvement"]
+            "economic_impact_rupees": self.expectancy["economic_impact_rupees"]
         }
 
         return self.structured_summary
+
+    # ==========================================================
+    # Narrative — Rule Compliance Section
+    # ==========================================================
+    def build_rule_narrative(self):
+
+        violations = self.rules["violations"]
+        scores = self.rules["discipline_scores"]
+
+        discipline_score = scores["overall_discipline_score"]
+        
+        risk_breach = violations["risk_breach_count"]
+        rr_violation = violations["rr_violation_count"]
+        overtrading_days = violations["overtrading_days"]
+        daily_loss_breaches = violations["daily_loss_breaches"]
+
+        narrative_parts = []
+
+        # --------------------------------------------------
+        # Overall framing
+        # --------------------------------------------------
+        if discipline_score >= 85:
+            narrative_parts.append(
+                f"Execution discipline was strong this week (Score: {discipline_score}/100)."
+            )
+        elif discipline_score >= 65:
+            narrative_parts.append(
+                f"Execution discipline was moderate this week (Score: {discipline_score}/100), with identifiable areas for tightening."
+            )
+        else:
+            narrative_parts.append(
+                f"Execution discipline was inconsistent this week (Score: {discipline_score}/100), with structural rule breaches affecting stability."
+            )
+
+        # --------------------------------------------------
+        # Risk management
+        # --------------------------------------------------
+        if risk_breach == 0:
+            narrative_parts.append(
+                "Risk per trade was respected across positions."
+            )
+        else:
+            narrative_parts.append(
+                f"{risk_breach} trade(s) exceeded declared risk, indicating lapses in loss containment."
+            )
+
+        # --------------------------------------------------
+        # Daily loss containment
+        # --------------------------------------------------
+        if daily_loss_breaches == 0:
+            narrative_parts.append(
+                "Daily loss limits were maintained."
+            )
+        else:
+            narrative_parts.append(
+                f"{daily_loss_breaches} day(s) breached maximum daily loss, increasing capital volatility."
+            )
+
+        # --------------------------------------------------
+        # Overtrading control
+        # --------------------------------------------------
+        if overtrading_days == 0:
+            narrative_parts.append(
+                "Trade frequency remained within planned limits."
+            )
+        else:
+            narrative_parts.append(
+                f"Overtrading occurred on {overtrading_days} day(s), suggesting emotional or reactive participation."
+            )
+
+        # --------------------------------------------------
+        # R:R discipline
+        # --------------------------------------------------
+        if rr_violation == 0:
+            narrative_parts.append(
+                "Profit targets were aligned with minimum reward expectations."
+            )
+        else:
+            narrative_parts.append(
+                f"{rr_violation} winning trade(s) closed below minimum R:R threshold, reflecting premature profit capture."
+            )
+
+        return " ".join(narrative_parts)
 
     # --------------------------------------------------
     # Convert Snapshot to Narrative Text
     # --------------------------------------------------
     def build_narrative_summary(self):
         """
-        Converts structured session metrics into a concise narrative summary.
+        Converts structured metrics into a performance-coach style narrative.
 
         The narrative explains:
         - Behavioral state classification
@@ -92,18 +184,51 @@ class SessionSummaryBuilder:
         downstream retrieval in the RAG system.
         """
         state = self.behavior["behavioral_state"]
-        severity = self.behavior["severity_score"]
-        expectancy_delta = self.expectancy["expectancy_delta_R"]
-        economic_cost = self.expectancy["economic_impact_rupees"]
+        severity = round(self.behavior["severity_score"], 2)
+
+        exp_normal = round(self.expectancy["expectancy_normal_R"], 2)
+        exp_post = round(self.expectancy["expectancy_post_R"], 2)
+        exp_delta = round(self.expectancy["expectancy_delta_R"], 2)
+        rupee_impact = round(self.expectancy["economic_impact_rupees"])
+
+        # State-based interpretation
+        if state == "ADAPTIVE_RECOVERY":
+            interpretation = (
+                "You tend to improve execution after losses rather than deteriorate. "
+                "This reflects emotional resilience and controlled risk behavior."
+            )
+
+        elif state == "LOSS_ESCALATION":
+            interpretation = (
+                "Losses expand following losing trades, indicating emotional risk escalation. "
+                "Reducing downside variance after drawdowns should be a priority."
+            )
+
+        elif state == "CONFIDENCE_CONTRACTION":
+            interpretation = (
+                "Win size decreases after losses, suggesting hesitation or reduced conviction. "
+                "Maintaining structured execution after setbacks is critical."
+            )
+
+        else:  # STABLE
+            interpretation = (
+                "Your performance remains consistent regardless of recent losses. "
+                "This indicates disciplined execution and stable risk management."
+            )
+
+        formatted_expectancy = format_expectancy_summary(
+            exp_normal,
+            exp_post,
+            exp_delta,
+            rupee_impact,
+            risk_per_trade=self.expectancy.get("risk_per_trade")
+        )
 
         narrative = (
-            f"In this session of {self.total_trades} trades, "
-            f"the trader was classified as {state} with a severity score of {severity}. "
-            f"Expectancy shifted from {self.expectancy['expectancy_normal_R']}R "
-            f"under normal conditions to {self.expectancy['expectancy_post_R']}R "
-            f"after losses, resulting in a delta of {expectancy_delta}R per trade. "
-            f"This behavioral distortion corresponds to an estimated financial impact "
-            f"of ₹{economic_cost} over the analyzed period."
+            f"In this session of {self.total_trades} trades, you were classified as {state} "
+            f"(severity {severity}).\n\n"
+            f"{interpretation}\n\n"
+            f"{formatted_expectancy}"
         )
 
         self.narrative_summary = narrative
@@ -138,7 +263,7 @@ class SessionSummaryBuilder:
         return metadata
 
     # --------------------------------------------------
-    # Run Full Builder
+    # Run Full Session Summary Builder
     # --------------------------------------------------
     def run(self):
         """
@@ -156,9 +281,11 @@ class SessionSummaryBuilder:
         structured = self.build_structured_summary()
         narrative = self.build_narrative_summary()
         metadata = self.build_metadata()
+        rule_narrative = self.build_rule_narrative()
 
         return {
             "structured_summary": structured,
             "narrative_summary": narrative,
+            "rule_narrative": rule_narrative,
             "metadata": metadata
         }

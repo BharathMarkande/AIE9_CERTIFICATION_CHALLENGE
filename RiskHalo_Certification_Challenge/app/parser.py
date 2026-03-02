@@ -1,9 +1,3 @@
-"""
-Parser module for RiskHalo Certification Challenge.
-Handles parsing and preprocessing of input data.
-"""
-
-
 import pandas as pd
 import hashlib
 import os
@@ -112,9 +106,13 @@ class TradeParser:
                 .astype(float)
             )
 
-        # Convert dates (date-only format)
-        self.df["entry_time"] = pd.to_datetime(self.df["entry_time"])
-        self.df["exit_time"] = pd.to_datetime(self.df["exit_time"])
+        # Convert dates (supports dd-mm-yyyy, yyyy-mm-dd, and datetime strings)
+        self.df["entry_time"] = pd.to_datetime(
+            self.df["entry_time"], format="mixed", dayfirst=True
+        )
+        self.df["exit_time"] = pd.to_datetime(
+            self.df["exit_time"], format="mixed", dayfirst=True
+        )
 
         # Sort chronologically by exit date
         self.df = self.df.sort_values("exit_time").reset_index(drop=True)

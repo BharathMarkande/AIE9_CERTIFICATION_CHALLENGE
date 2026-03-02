@@ -19,7 +19,7 @@ class RiskHaloVectorStore:
             name="riskhalo_sessions"
         )
 
-    def add_session(self, session_id: str, embedding: list, document: str):
+    def add_session(self, session_id: str, embedding: list, document: str, metadata: dict):
         """
         Stores a new session snapshot in the vector database.
 
@@ -29,8 +29,9 @@ class RiskHaloVectorStore:
             document (str): Narrative summary.
         """
 
-        self.collection.add(
+        self.collection.upsert(
             ids=[session_id],
             embeddings=[embedding],
-            documents=[document]
+            documents=[document],
+            metadatas=[metadata] if metadata else None
         )

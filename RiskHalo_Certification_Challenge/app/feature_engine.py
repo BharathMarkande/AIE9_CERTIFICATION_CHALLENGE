@@ -14,7 +14,7 @@ class FeatureEngine:
             raise ValueError("Declared risk per trade must be positive.")
 
     # --------------------------------------------------
-    # 1️⃣ Compute R Proxy
+    # Compute R Proxy
     # --------------------------------------------------
     def compute_r_proxy(self):
         """
@@ -30,7 +30,7 @@ class FeatureEngine:
         return self.df
 
     # --------------------------------------------------
-    # 2️⃣ Win / Loss Flags
+    # Win / Loss Flags
     # --------------------------------------------------
     def compute_outcome_flags(self):
         """
@@ -50,7 +50,7 @@ class FeatureEngine:
         return self.df
 
     # --------------------------------------------------
-    # 3️⃣ Trade Sequence Number
+    # Trade Sequence Number
     # --------------------------------------------------
     def compute_trade_sequence(self):
         """
@@ -68,7 +68,7 @@ class FeatureEngine:
         return self.df
 
     # --------------------------------------------------
-    # 4️⃣ Loss Streak Count
+    # Loss Streak Count
     # --------------------------------------------------
     def compute_loss_streak(self):
         """
@@ -95,7 +95,7 @@ class FeatureEngine:
         return self.df
 
     # --------------------------------------------------
-    # 5️⃣ Win Streak Count
+    # Win Streak Count
     # --------------------------------------------------
     def compute_win_streak(self):
         """
@@ -122,7 +122,7 @@ class FeatureEngine:
         return self.df
 
     # --------------------------------------------------
-    # 6️⃣ Post-Loss Flag
+    # Post-Loss Flag
     # --------------------------------------------------
     def compute_post_loss_flag(self):
         """
@@ -148,7 +148,7 @@ class FeatureEngine:
         return self.df
 
     # --------------------------------------------------
-    # 7️⃣ Run Full Pipeline
+    # Run Full Pipeline
     # --------------------------------------------------
     def run(self):
         """
