@@ -52,15 +52,6 @@ class RiskHaloTestsetGenerator:
         sessions = list(zip(documents, metadatas))
 
         # --------------------------------------------------
-        # Sort sessions chronologically if timestamp exists
-        # --------------------------------------------------
-        # def sort_key(item):
-        #     metadata = item[1]
-        #     return metadata.get("session_id", "")
-
-        # sessions.sort(key=sort_key)
-
-        # --------------------------------------------------
         # Global Header
         # --------------------------------------------------
         global_header = (
@@ -117,7 +108,7 @@ class RiskHaloTestsetGenerator:
         questions = []
 
         for persona_name, persona in TRADER_PERSONAS.items():
-            persona_questions = persona["question_templates"][:1]
+            persona_questions = persona["question_templates"][:2]
             questions.extend(persona_questions)
 
         return questions  # total = 10

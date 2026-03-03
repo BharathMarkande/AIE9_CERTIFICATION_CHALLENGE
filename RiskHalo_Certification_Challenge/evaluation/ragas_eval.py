@@ -4,7 +4,6 @@ from ragas.llms import LangchainLLMWrapper
 from ragas.metrics import (
     LLMContextRecall,
     Faithfulness,
-    FactualCorrectness,
     ResponseRelevancy,
     ContextEntityRecall,
     ContextPrecision,
@@ -28,9 +27,7 @@ class RiskHaloRagasEvaluator:
         self.llm = LangchainLLMWrapper(
             ChatOpenAI(model="gpt-4o-mini", temperature=0)
         )
-
         self.embedding_model = OpenAIEmbeddings()
-
         self.testset_generator = RiskHaloTestsetGenerator()
         self.retriever = RiskHaloRetriever()
 
@@ -58,19 +55,14 @@ class RiskHaloRagasEvaluator:
 
             ragas_rows.append(
                 {
-                    "question": question,
-                    "contexts": retrieved_contexts,
-                    "ground_truth": row["context"],
-                    "response": answer,
+                    "question": question,            # user question
+                    "contexts": retrieved_contexts,  # retrieved top-k=4 session summaries
+                    "ground_truth": row["context"],  # ground truth session summary
+                    "response": answer,              # grounded LLM response
                 }
             )
 
         ds = Dataset.from_list(ragas_rows)
-
-        # Pretty print with truncation
-        df = ds.to_pandas()[["question", "contexts", "ground_truth", "response"]]
-        print("\nRagas dataset :: preview")
-        print(df)
 
         return ds
 
@@ -92,7 +84,6 @@ class RiskHaloRagasEvaluator:
                 ContextPrecision(),
                 ContextEntityRecall(),
                 Faithfulness(),
-                FactualCorrectness(),
                 ResponseRelevancy()
             ],
             llm=self.llm,
