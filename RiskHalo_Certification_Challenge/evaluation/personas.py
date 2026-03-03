@@ -13,6 +13,7 @@ TRADER_PERSONAS = {
             "Trader prone to emotional escalation after losses. "
             "Often increases risk, overtrades, and breaches daily limits."
         ),
+        "behavioral_state": "LOSS_ESCALATION",
         "question_templates": [
             "Why do my losses increase after a losing trade?",
             "Am I escalating risk after losses?",
@@ -25,6 +26,7 @@ TRADER_PERSONAS = {
             "Trader with high win rate but low average R. "
             "Exits profitable trades too early."
         ),
+        "behavioral_state": "CONFIDENCE_CONTRACTION",
         "question_templates": [
             "Why is my expectancy negative despite winning often?",
             "Am I cutting profits too early?",
@@ -36,6 +38,7 @@ TRADER_PERSONAS = {
         "description": (
             "Trader who follows risk rules but struggles with profitability."
         ),
+        "behavioral_state": "CONFIDENCE_CONTRACTION",
         "question_templates": [
             "I follow rules but still lose. Why?",
             "Is discipline enough to be profitable?",
@@ -47,6 +50,7 @@ TRADER_PERSONAS = {
         "description": (
             "Trader who improves after losses and maintains discipline."
         ),
+        "behavioral_state": "ADAPTIVE_RECOVERY",
         "question_templates": [
             "Am I improving over time?",
             "Is my recovery behavior healthy?",
@@ -58,6 +62,7 @@ TRADER_PERSONAS = {
         "description": (
             "Trader with very few trades and limited post-loss activity."
         ),
+        "behavioral_state": "INSUFFICIENT_POST_LOSS_DATA",
         "question_templates": [
             "Is there enough data to evaluate my behavior?",
             "What can be inferred from a small sample?",
@@ -75,6 +80,7 @@ TRADER_PERSONAS = {
 #             "Trader prone to emotional escalation after losses. "
 #             "Often increases risk, overtrades, and breaches daily limits."
 #         ),
+#         "behavioral_state": "LOSS_ESCALATION",
 #         "question_templates": [
 #             "Why do my losses increase after a losing trade?",
 #             "Am I escalating risk after losses?",

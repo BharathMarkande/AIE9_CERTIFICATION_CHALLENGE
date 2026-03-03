@@ -11,6 +11,7 @@ from ragas.metrics import (
 from datasets import Dataset
 from evaluation.generate_testset import RiskHaloTestsetGenerator
 from rag.retriever import RiskHaloRetriever
+from evaluation.personas import TRADER_PERSONAS
 
 
 class RiskHaloRagasEvaluator:
@@ -36,36 +37,74 @@ class RiskHaloRagasEvaluator:
     # --------------------------------------------------
     def prepare_ragas_dataset(self):
         """
-        1. Generate dataset (10 Qs, single raw_doc)
-        2. Run full RAG pipeline per question
-        3. Build RAGAS-compatible dataset
-        """
+        Builds RAGAS dataset using persona-aligned ground truth.
 
-        dataset = self.testset_generator.generate_dataset()
+        For each persona:
+        - Filter sessions by behavioral_state
+        - Concatenate matching sessions as ground truth
+        - Generate 2 evaluation questions
+        - Run full RAG pipeline
+        """
 
         ragas_rows = []
 
-        for row in dataset:
-            question = row["question"]
+        # Fetch all sessions once
+        data = self.retriever.collection.get(include=["documents", "metadatas"])
+        
+        print(f"prepare_ragas_dataset::data length: {len(data)}")
+        all_docs = data.get("documents", [])
+        all_meta = data.get("metadatas", [])
 
-            # Run full RAG pipeline
-            rag_result = self.retriever.generate(question)
-            answer = rag_result["answer"]
-            retrieved_contexts = rag_result["retrieved_contexts"]
+        print(f"prepare_ragas_dataset::num documents: {len(all_docs)}")
 
-            ragas_rows.append(
-                {
-                    "question": question,            # user question
-                    "contexts": retrieved_contexts,  # retrieved top-k=4 session summaries
-                    "ground_truth": row["context"],  # ground truth session summary
-                    "response": answer,              # grounded LLM response
-                }
-            )
+        # Flatten if nested
+        if all_docs and isinstance(all_docs[0], list):
+            all_docs = all_docs[0]
 
-        ds = Dataset.from_list(ragas_rows)
+        sessions = list(zip(all_docs, all_meta))
 
-        return ds
+        for persona_name, persona in TRADER_PERSONAS.items():
 
+            target_state = persona["behavioral_state"]
+            questions = persona["question_templates"][:2]
+
+            # -----------------------------------------
+            # Filter sessions matching persona state
+            # -----------------------------------------
+            matching_sessions = [
+                doc for doc, meta in sessions
+                if meta.get("behavioral_state") == target_state
+            ]
+
+            # If no sessions match this persona's behavioral_state,
+            # fall back to using all available sessions so that
+            # RAGAS still has data to evaluate on.
+            if not matching_sessions:
+                matching_sessions = [doc for doc, _ in sessions]
+
+            # Persona-specific ground truth
+            ground_truth_context = "\n\n".join(matching_sessions)
+
+            # -----------------------------------------
+            # For each question → run RAG
+            # -----------------------------------------
+            for question in questions:
+
+                rag_result = self.retriever.generate(question)
+
+                answer = rag_result["answer"]
+                retrieved_contexts = rag_result["retrieved_contexts"]
+
+                ragas_rows.append(
+                    {
+                        "question": question,
+                        "contexts": retrieved_contexts,
+                        "ground_truth": ground_truth_context,
+                        "response": answer,
+                    }
+                )
+
+        return Dataset.from_list(ragas_rows)
     # --------------------------------------------------
     # Run Evaluation
     # --------------------------------------------------

@@ -21,7 +21,20 @@ def main():
 
     results = evaluator.evaluate()
 
-    print_results("RAGAS Evaluation Results", results)
+    print_results("RAGAS Evaluation Baseline Results - Overall metrics (mean)", results)
+
+    # per-question metrics
+    df = results.to_pandas()
+    cols = [
+        "user_input",
+        "context_recall",
+        "context_entity_recall",
+        "context_precision",
+        "faithfulness",
+        "answer_relevancy",
+    ]
+    print("\nRAGAS Evaluation Baseline Results - per-question metrics")
+    print(df[cols])
 
     print("\nEvaluation Completed.\n")
 
