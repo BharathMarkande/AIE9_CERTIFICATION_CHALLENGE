@@ -6,11 +6,11 @@
 
 ### Task 1: Problem, Audience and Scope
 
-1. Write a succinct 1-sentence description of the problem
+#### 1. Write a succinct 1-sentence description of the problem
 
 Retail intraday traders frequently underperform not due to flawed strategies, but because emotional decision-making disrupts disciplined risk management - leading to overtrading, revenge trading, premature profit-taking and failure to cut losses according to predefined rules.
 
-2. Write 1-2 paragraphs on why this is a problem for your specific user
+#### 2. Write 1-2 paragraphs on why this is a problem for your specific user
 
 **RiskHalo** targets **Indian F&O intraday retail traders** - a segment where regulatory data from SEBI ((Securities and Exchange Board of India)) indicates that nearly 95% of participants incur losses, with approximately ₹1.8 lakh crore ($2.2 trillion USD) lost over the past three years. This reflects a structural execution problem rather than isolated trading mistakes.
 
@@ -22,7 +22,7 @@ This is a problem worth solving because capital loss driven by emotional and und
 
 ![Behavioral Pattern](deliverables/images/behavioral_pattern.png)
 
-3. Create a list of questions or input-output pairs that you can use to evaluate your application
+#### 3. Create a list of questions or input-output pairs that you can use to evaluate your application
 
 **Evaluation questions** - this will later form the RAGAS evaluation dataset
 
@@ -45,7 +45,7 @@ This is a problem worth solving because capital loss driven by emotional and und
 
 ### Task 2: Propose a Solution
 
-4. Write 1-2 paragraphs on your proposed solution. How will it look and feel to the user? Describe the tools you plan to use to build it.
+#### 4. Write 1-2 paragraphs on your proposed solution. How will it look and feel to the user? Describe the tools you plan to use to build it.
 
 RiskHalo is designed as a Behavioral Risk Intelligence Engine that transforms raw trade data into structured behavioral diagnostics and actionable execution feedback. The system analyzes weekly trade uploads, computes deterministic performance and behavioral metrics and generates a structured session summary highlighting behavioral state classification, severity, expectancy shifts and rule compliance. Instead of predicting markets, RiskHalo focuses strictly on execution discipline, identifying whether performance degradation is driven by emotional distortion, structural expectancy issues, or rule violations. The user experience is analytical, data-backed and performance-oriented, resembling a trading performance dashboard combined with a disciplined execution coach.
 
@@ -53,7 +53,7 @@ From a technical standpoint, the system is built using a modular architecture. A
 
 As the behavioral pattern is the same , the *real insight of the MVP is NOT* **"How to make money"** but **"How to stop leaking money, to reduce the drawdowns/losses"**.
 
-5. Create an infrastructure diagram of your stack showing how everything fits together.  Write one sentence on why you made each tooling choice.
+#### 5. Create an infrastructure diagram of your stack showing how everything fits together.  Write one sentence on why you made each tooling choice.
 
 
 ![RiskHalo Architecture](deliverables/images/riskhalo_architecture.png)
@@ -73,7 +73,7 @@ As the behavioral pattern is the same , the *real insight of the MVP is NOT* **"
 |10|Other Key Component – Multi-Query Retriever|Implemented to improve context recall by expanding user intent into multiple semantically aligned retrieval queries.|
 
 
-6. What are the RAG and agent components of your project, exactly?
+#### 6. What are the RAG and agent components of your project, exactly?
 
 **RAG Components in RiskHalo:**
 
@@ -146,7 +146,7 @@ These are invoked before RAG and provide structured truth.
 
 ### Task 3: Dealing with the Data
 
-7. Describe the default chunking strategy that you will use for your data. Why did you make this decision?
+#### 7. Describe the default chunking strategy that you will use for your data. Why did you make this decision?
 
 **Default Chunking Strategy:**
 
@@ -157,7 +157,7 @@ The default chunking strategy is session-level semantic chunking, where each wee
 This decision was made because each weekly session summary is already a logically atomic and semantically coherent unit. Splitting sessions into smaller chunks (e.g: paragraph-level) would risk separating closely related behavioral metrics and weakening contextual integrity, thereby reducing grounding quality during retrieval. Since RiskHalo performs analysis at the session level (behavioral state and expectancy are computed per session), session-level chunking preserves metric cohesion, improves retrieval precision and aligns directly with the system's deterministic architecture.
 
 
-8. Describe your data source and the external API you plan to use, as well as what role they will play in your solution. Discuss how they interact during usage.
+#### 8. Describe your data source and the external API you plan to use, as well as what role they will play in your solution. Discuss how they interact during usage.
 
 **Data Source**
 
