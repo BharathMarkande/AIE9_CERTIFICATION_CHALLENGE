@@ -1,13 +1,17 @@
-# AIE09 Certification Challenge - RiskHalo - A Behavioral Risk Intelligence Engine for Intraday Traders
+# AIE09 Certification Challenge
 
-##✅ Deliverables
+#RiskHalo - A Behavioral Risk Intelligence Engine for Intraday Traders
+
+##Deliverables:
 
 ### Task 1: Problem, Audience and Scope
 
 1. Write a succinct 1-sentence description of the problem
+
 Retail intraday traders frequently underperform not due to flawed strategies, but because emotional decision-making disrupts disciplined risk management - leading to overtrading, revenge trading, premature profit-taking and failure to cut losses according to predefined rules.
 
 2. Write 1-2 paragraphs on why this is a problem for your specific user
+
 **RiskHalo** targets **Indian F&O intraday retail traders** - a segment where regulatory data from SEBI ((Securities and Exchange Board of India)) indicates that nearly 95% of participants incur losses, with approximately ₹1.8 lakh crore ($2.2 trillion USD) lost over the past three years. This reflects a structural execution problem rather than isolated trading mistakes.
 
 A significant portion of retail traders struggle to consistently follow predefined risk rules. Despite consuming large amounts of market content and strategy material, they lack structured feedback on their execution behavior. Emotional responses such as overtrading, revenge trading, fear of missing out and premature profit-taking frequently override disciplined risk management. Without a systematic trading journal or visibility into recurring loss patterns, traders are unable to diagnose **behavioral distortions** and end up repeating the same execution errors, **leading to rapid drawdowns and eventual capital erosion**.
@@ -19,7 +23,9 @@ This is a problem worth solving because capital loss driven by emotional and und
 ![Behavioral Pattern](deliverables/images/behavioral_pattern.png)
 
 3. Create a list of questions or input-output pairs that you can use to evaluate your application
+
 **Evaluation questions** - this will later form the RAGAS evaluation dataset
+
 | Input | Expecte Output |
 |-------|----------------|
 |Why do my losses increase after a losing trade?|ystem identifies whether LOSS_ESCALATION exists, references post-loss loss expansion metrics, and explains if risk increases conditionally after losses.|
