@@ -38,7 +38,7 @@ TRADER_PERSONAS = {
         "description": (
             "Trader who follows risk rules but struggles with profitability."
         ),
-        "behavioral_state": "CONFIDENCE_CONTRACTION",
+        "behavioral_state": "STABLE",
         "question_templates": [
             "I follow rules but still lose. Why?",
             "Is discipline enough to be profitable?",

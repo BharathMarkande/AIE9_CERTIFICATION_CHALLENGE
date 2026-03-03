@@ -1,3 +1,5 @@
+import argparse
+
 from evaluation.ragas_eval import RiskHaloRagasEvaluator
 
 
@@ -14,14 +16,28 @@ def print_results(title, results):
 
 
 def main():
+    parser = argparse.ArgumentParser(
+        description="Run RiskHalo RAGAS evaluation (baseline or multi-query retriever)."
+    )
+    parser.add_argument(
+        "--baseline",
+        action="store_true",
+        help="Use single-query (baseline) retriever instead of multi-query.",
+    )
+    args = parser.parse_args()
+    use_multi_query = not args.baseline
 
-    print("\nStarting Simplified RiskHalo RAGAS Evaluation...\n")
+    retriever_label = "baseline (single-query)" if args.baseline else "multi-query"
+    print("\nStarting Simplified RiskHalo RAGAS Evaluation...")
+    print(f"Retriever: {retriever_label}\n")
 
-    evaluator = RiskHaloRagasEvaluator()
+    evaluator = RiskHaloRagasEvaluator(use_multi_query=use_multi_query)
 
     results = evaluator.evaluate()
 
-    print_results("RAGAS Evaluation Baseline Results - Overall metrics (mean)", results)
+    print_results(
+        f"RAGAS Evaluation ({retriever_label}) - Overall metrics (mean)", results
+    )
 
     # per-question metrics
     df = results.to_pandas()
@@ -33,7 +49,7 @@ def main():
         "faithfulness",
         "answer_relevancy",
     ]
-    print("\nRAGAS Evaluation Baseline Results - per-question metrics")
+    print(f"\nRAGAS Evaluation ({retriever_label}) - per-question metrics")
     print(df[cols])
 
     print("\nEvaluation Completed.\n")

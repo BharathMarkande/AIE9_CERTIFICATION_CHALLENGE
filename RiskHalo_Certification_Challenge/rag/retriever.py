@@ -58,7 +58,7 @@ class RiskHaloRetriever:
     # --------------------------------------------------
     # Retrieve Relevant Sessions
     # --------------------------------------------------
-    def retrieve(self, query: str):
+    def retrieve(self, query: str, metadata_filter: dict = None):
         """
         Performs vector similarity search against stored
         session summaries.
@@ -78,11 +78,14 @@ class RiskHaloRetriever:
         results = self.collection.query(
             query_embeddings=[query_embedding],
             n_results=self.top_k,
+            where=metadata_filter
         )
 
         documents = results.get("documents", [[]])[0]
-        print(f"Retrieved top {self.top_k} documents from ChromaDB :: documents length: {len(documents)}")
-        return documents
+        metadatas = results.get("metadatas", [[]])[0]
+        metadata_filter: dict = None
+        print(f"Retrieved top {len(documents)} documents from ChromaDB :: configured topK: {self.top_k}")
+        return documents, metadatas
 
     # --------------------------------------------------
     # Build Prompt
@@ -114,7 +117,7 @@ class RiskHaloRetriever:
     # --------------------------------------------------
     # Generate Answer
     # --------------------------------------------------
-    def generate(self, question: str):
+    def generate(self, question: str, metadata_filter: dict = None):
         """
         Executes full RAG pipeline:
         - Retrieve
@@ -131,18 +134,22 @@ class RiskHaloRetriever:
             }
         """
 
-        contexts = self.retrieve(question)
+        retrieved_contexts, retrieved_metadatas = self.retrieve(
+            question, 
+            metadata_filter=metadata_filter
+            )
 
-        if not contexts:
+        if not retrieved_contexts:
             return {
                 "question": question,
                 "retrieved_contexts": [],
+                "retrieved_metadatas": [],
                 "answer": "No relevant session data found."
             }
 
         system_prompt, user_prompt = self.build_prompt(
             question,
-            contexts
+            retrieved_contexts
         )
 
         response = self.llm.chat.completions.create(
@@ -158,6 +165,7 @@ class RiskHaloRetriever:
 
         return {
             "question": question,
-            "retrieved_contexts": contexts,
+            "retrieved_contexts": retrieved_contexts,
+            "retrieved_metadatas": retrieved_metadatas,
             "answer": answer,
         }

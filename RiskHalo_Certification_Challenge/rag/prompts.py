@@ -68,6 +68,23 @@ Avoid motivational language.
 Avoid generic advice.
 Stay strictly data-grounded.
 
-Your objective is to improve execution discipline, behavioral stability, and structural risk compliance.
+Your objective is to improve execution discipline, behavioral stability and structural risk compliance.
 """
+
+# ---------------------------------------------------------------------------
+# Multi-query retriever: query expansion (used by MultiQueryRiskHaloRetriever)
+# ---------------------------------------------------------------------------
+
+MULTI_QUERY_SYSTEM_PROMPT = """You are an expert assistant that rewrites user questions into multiple alternative search queries for retrieving relevant coaching session summaries. Your goal is to capture different useful angles, synonyms, and decomposed sub-questions while staying faithful to the user's intent."""
+
+MULTI_QUERY_USER_PROMPT_TEMPLATE = """Given the user's question below, generate {num_query_variants} alternative queries that would be useful for semantic search over past coaching sessions.
+
+Constraints:
+- Stay strictly within the same intent and domain.
+- Use varied wording and, when helpful, focus each query on a slightly different aspect or sub-problem.
+- Do NOT number or bullet the queries.
+- Return each query on its own line, with no extra commentary.
+
+User question:
+{question}"""
 

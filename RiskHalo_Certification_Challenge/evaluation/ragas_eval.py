@@ -11,6 +11,7 @@ from ragas.metrics import (
 from datasets import Dataset
 from evaluation.generate_testset import RiskHaloTestsetGenerator
 from rag.retriever import RiskHaloRetriever
+from rag.multi_query_retriever import MultiQueryRiskHaloRetriever
 from evaluation.personas import TRADER_PERSONAS
 
 
@@ -24,13 +25,20 @@ class RiskHaloRagasEvaluator:
     - Full metric set
     """
 
-    def __init__(self):
+    def __init__(self, use_multi_query: bool = True):
         self.llm = LangchainLLMWrapper(
             ChatOpenAI(model="gpt-4o-mini", temperature=0)
         )
         self.embedding_model = OpenAIEmbeddings()
         self.testset_generator = RiskHaloTestsetGenerator()
-        self.retriever = RiskHaloRetriever()
+
+        # Use multi-query retriever by default to improve context recall and
+        # other RAGAS metrics, while keeping an easy option to fall back to the
+        # baseline single-query retriever for comparison.
+        if use_multi_query:
+            self.retriever = MultiQueryRiskHaloRetriever()
+        else:
+            self.retriever = RiskHaloRetriever()
 
     # --------------------------------------------------
     # Prepare RAGAS Dataset
@@ -90,10 +98,21 @@ class RiskHaloRagasEvaluator:
             # -----------------------------------------
             for question in questions:
 
-                rag_result = self.retriever.generate(question)
+                #rag_result = self.retriever.generate(question)
+                rag_result = self.retriever.generate(
+                    question,
+                    metadata_filter={"behavioral_state": target_state}
+                )
 
                 answer = rag_result["answer"]
                 retrieved_contexts = rag_result["retrieved_contexts"]
+                retrieved_metadatas = rag_result["retrieved_metadatas"]
+
+                print("Target State:", target_state)
+                print("Retrieved States:", [
+                    meta.get("behavioral_state")
+                    for meta in retrieved_metadatas
+                ])
 
                 ragas_rows.append(
                     {
