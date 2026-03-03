@@ -1,8 +1,8 @@
 # AIE09 Certification Challenge
 
-#RiskHalo - A Behavioral Risk Intelligence Engine for Intraday Traders
+# RiskHalo - A Behavioral Risk Intelligence Engine for Intraday Traders
 
-##Deliverables:
+## Deliverables:
 
 ### Task 1: Problem, Audience and Scope
 
@@ -26,7 +26,7 @@ This is a problem worth solving because capital loss driven by emotional and und
 
 **Evaluation questions** - this will later form the RAGAS evaluation dataset
 
-| Input | Expecte Output |
+| Input | Expected Output |
 |-------|----------------|
 |Why do my losses increase after a losing trade?|ystem identifies whether LOSS_ESCALATION exists, references post-loss loss expansion metrics, and explains if risk increases conditionally after losses.|
 |Is my behavior unstable after red days?|System evaluates behavioral_state and severity score, determines whether execution degrades post-loss, and states if instability is statistically supported.|
@@ -43,4 +43,93 @@ This is a problem worth solving because capital loss driven by emotional and und
 |Is trader stable under pressure?|STABLE/ADAPTIVE/CONTRACTION|
 
 
+### Task 2: Propose a Solution
 
+4. Write 1-2 paragraphs on your proposed solution. How will it look and feel to the user? Describe the tools you plan to use to build it.
+
+RiskHalo is designed as a Behavioral Risk Intelligence Engine that transforms raw trade data into structured behavioral diagnostics and actionable execution feedback. The system analyzes weekly trade uploads, computes deterministic performance and behavioral metrics and generates a structured session summary highlighting behavioral state classification, severity, expectancy shifts and rule compliance. Instead of predicting markets, RiskHalo focuses strictly on execution discipline, identifying whether performance degradation is driven by emotional distortion, structural expectancy issues, or rule violations. The user experience is analytical, data-backed and performance-oriented, resembling a trading performance dashboard combined with a disciplined execution coach.
+
+From a technical standpoint, the system is built using a modular architecture. A parsing layer processes structured trade data, followed by deterministic Behavioral, Expectancy and Rule Compliance engines. Session summaries are embedded using the OpenAI API and stored in a ChromaDB vector database to enable retrieval-augmented analysis across historical sessions. A multi-query retriever and structured system prompt power the coaching layer, ensuring responses remain grounded in session data. Evaluation is conducted using RAGAS to measure retrieval quality, faithfulness and behavioral grounding. The overall design prioritizes determinism, traceability and measurable performance improvement over heuristic or speculative outputs.
+
+As the behavioral pattern is the same , the *real insight of the MVP is NOT* **"How to make money"** but **"How to stop leaking money, to reduce the drawdowns/losses"**.
+
+5. Create an infrastructure diagram of your stack showing how everything fits together.  Write one sentence on why you made each tooling choice.
+
+
+![RiskHalo Architecture](deliverables/images/riskhalo_architecture.png)
+
+
+| Sr.No. |Tool  |Tooling Choice Reason|
+|-------|----------------|----------------|
+|1|LLM(s) – OpenAI (gpt-4o-mini)|Chosen for its high performance, a 128K context window and cost effective pricing, provides decent intelligence which is enough for the certification challenege.|
+|2|Agent Orchestration Framework – Lightweight Custom Orchestration (LangGraph-style flow)|Used to enforce deterministic control over retrieval, reasoning steps and structured response formatting without introducing unnecessary complexity.|
+|3|Tool(s) - Deterministic Analytics Engines (Feature, Behavioral, Expectancy, Rule Compliance), Tavily API|Implemented as pure Python modules to ensure explainability, auditability and mathematically traceable behavioral diagnostics. Using Tavily API for web search as a tool to coaching agent.|
+|4|Embedding Model – OpenAI Embeddings API (text-embedding-3-small)|Selected for high semantic quality and strong performance on financial and behavioral language, improving retrieval accuracy.|
+|5|Vector Database – ChromaDB|Chosen for its lightweight setup, metadata filtering support and seamless integration for hybrid semantic + state-aware retrieval.|
+|6|Monitoring Tool – Logging + RAGAS Metrics|Used to track retrieval quality, faithfulness and grounding performance in a measurable and reproducible way.|
+|7|Evaluation Framework – RAGAS|Selected to quantitatively assess context recall, context precision, faithfullness, response relevancy|
+|8|User Interface|ReactJS + Javascript on the frontend and Python on the backend, both are known tech|
+|9|Deployment Tool - Vercel|Vercel for seamless and easy deployments.|
+|10|Other Key Component – Multi-Query Retriever|Implemented to improve context recall by expanding user intent into multiple semantically aligned retrieval queries.|
+
+
+6. What are the RAG and agent components of your project, exactly?
+
+RAG Components in RiskHalo:
+a) Document Source:
+    - Weekly Session Summaries
+        - Generated by deterministic engines
+        - Contain behavioral_state, severity_score, expectancy metrics, rule compliance metrics
+        - Stored as structured narrative + metadata
+
+b) Embedding Layer:
+    - OpenAI Embedding Model
+        - Converts session summaries into dense vector representations
+        - Converts user queries into query embeddings
+
+c) Vector Store:
+    - ChromaDB
+        - Stores: session_id, embedding vector, document (narrative summary), metadata (behavioral_state, severity_score, etc.)
+        - Supports semantic similarity search
+        - Supports metadata filtering (where={"behavioral_state": ...})
+
+d) Retriever:
+    - Multi-Query Retriever
+        - Expands user question into multiple semantically aligned queries
+        - Retrieves top-k relevant session summaries
+        - Optionally applies behavioral_state metadata filter
+        - Returns: retrieved_contexts, retrieved_metadatas
+This is the core RAG retrieval mechanism.
+
+e) Generator:
+    - LLM (OpenAI GPT-4 class model)
+        - Receives: System prompt, Retrieved session summaries, User question
+        - Produces: Structured 4-section coaching response
+This completes the RAG loop:
+Query → Embed → Retrieve → Grounded Generate
+
+Agent Components in RiskHalo:
+a) Coach Agent:
+    - This is your primary agent.
+    - Responsibilities:
+        - Calls retriever
+        - Injects retrieved context into prompt
+        - Enforces strict response structure
+        - Ensures behavioral grounding
+        - Prevents hallucination
+        - It orchestrates the RAG flow.
+        
+    - It does NOT:
+        - Compute metrics
+        - Modify data
+        - Calls Tavily API tool if required
+
+It is a controlled reasoning agent.
+
+b) Deterministic Engines (Tool-like Components)
+    - While not traditional LLM tools, these act as deterministic sub-systems: 
+        - FeatureEngine
+        - BehavioralEngine
+        - ExpectancyEngine
+        - RuleComplianceEngine
+These are invoked before RAG and provide structured truth.
