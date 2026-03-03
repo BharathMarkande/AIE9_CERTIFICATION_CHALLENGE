@@ -20,7 +20,7 @@ Beyond financial loss, the psychological impact is substantial. Repeated intrada
 
 This is a problem worth solving because capital loss driven by emotional and undisciplined execution is the leading cause of retail trader churn in the F&O market.
 
-![Behavioral Pattern](deliverables/images/behavioral_pattern.png)
+![Behavioral Pattern](images/behavioral_pattern.png)
 
 #### 3. Create a list of questions or input-output pairs that you can use to evaluate your application
 
@@ -56,7 +56,7 @@ As the behavioral pattern is the same , the *real insight of the MVP is NOT* **"
 #### 5. Create an infrastructure diagram of your stack showing how everything fits together.  Write one sentence on why you made each tooling choice.
 
 
-![RiskHalo Architecture](deliverables/images/riskhalo_architecture.png)
+![RiskHalo Architecture](images/riskhalo_architecture.png)
 
 
 | Sr.No. |Tool  |Tooling Choice Reason|
@@ -238,7 +238,7 @@ Key Metrics evaluated were --> Context Recall, Context Precision, Faithfulness, 
 
 *Ragas Evals baseline - Iteration 1*
 
-![RAGAS Evals baseline](deliverables/images/Ragas_Eval_baseline.png)
+![RAGAS Evals baseline](images/Ragas_Eval_baseline.png)
 
 
 #### 11. What conclusions can you draw about the performance and effectiveness of your pipeline with this information?
@@ -329,12 +329,12 @@ These iterations progressively strengthened the retrieval layer from basic simil
 
 **Iteration 2 Results - Advanced Retrieval Technique: Hybrid Retrieval (Dense + Metadata Filtering)**
 
-![RAGAS Evals Iteration 2](deliverables/images/Ragas_Eval_Iteration2.png)
+![RAGAS Evals Iteration 2](images/Ragas_Eval_Iteration2.png)
 
 
 **Iteration 3 Results - Advanced Retrieval Technique: Multi-Query Retrieval**
 
-![RAGAS Evals Iteration 3](deliverables/images/Ragas_Eval3_MultiQuery.png)
+![RAGAS Evals Iteration 3](images/Ragas_Eval3_MultiQuery.png)
 
 
 I evaluated the RAG pipeline using the RAGAS framework across the same persona-driven behavioral question set. The metrics assessed include
