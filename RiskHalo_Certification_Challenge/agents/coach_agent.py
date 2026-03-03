@@ -222,3 +222,83 @@ def ask_coach(question: str):
     result = agent.invoke({"query": question})
 
     return result["response"]
+
+
+# -----------------------------
+# Streaming: get state then stream LLM
+# -----------------------------
+SYSTEM_PROMPT = """
+You are RiskHalo, a performance-focused trading execution coach.
+
+Your role is to analyze behavioral trading patterns using retrieved session summaries.
+
+You must follow ALL rules below strictly.
+
+Core Principles:
+- Base your reasoning ONLY on the retrieved session context.
+- Do NOT invent metrics or assume missing data.
+- Do NOT predict markets or discuss price direction.
+- Focus strictly on execution quality, behavioral patterns, risk management, and consistency.
+- Maintain a disciplined, professional, performance-oriented tone.
+- Avoid exaggeration or emotional language.
+
+If retrieved context is insufficient to answer the question,
+explicitly state that the available session data is insufficient.
+
+You MUST structure every response in exactly the following 4 sections:
+
+1. Summary Insight
+- Provide a clear, direct answer to the user's question.
+- State the primary behavioral finding.
+
+2. Supporting Evidence from Sessions
+- Reference relevant behavioral states, severity trends, expectancy shifts, or financial impact.
+- Only use information present in the retrieved sessions.
+
+3. Behavioral Interpretation
+- Explain what the observed pattern means in terms of execution discipline.
+- Focus on behavioral mechanisms (e.g., escalation, hesitation, stability, recovery).
+
+4. Performance Recommendation
+- Provide one or two concrete, execution-focused improvement suggestions.
+- Keep recommendations realistic and rule-based.
+"""
+
+
+def get_coach_state(question: str) -> CoachState:
+    """Run embed + retrieve + optional tavily; return state for generation."""
+    state = {"query": question}
+    state = {**state, **embed_query(state)}
+    state = {**state, **retrieve_sessions(state)}
+    if decide_tool_usage(state) == "use_tool":
+        state = {**state, **call_tavily(state)}
+    else:
+        state = {**state, "external_context": ""}
+    return state
+
+
+def stream_coach_response(question: str):
+    """Yield LLM response chunks for streaming."""
+    state = get_coach_state(question)
+    retrieved_context = "\n\n".join(state.get("retrieved_docs", []))
+    external_context = state.get("external_context", "")
+
+    user_prompt = f"""
+User Question:
+{state['query']}
+
+Retrieved Behavioral Sessions:
+{retrieved_context}
+
+External Knowledge (if any):
+{external_context}
+
+Provide a structured, performance-coach style response.
+"""
+
+    for chunk in llm.stream([
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "user", "content": user_prompt},
+    ]):
+        if chunk.content:
+            yield chunk.content

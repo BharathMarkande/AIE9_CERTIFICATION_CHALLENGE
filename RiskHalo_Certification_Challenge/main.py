@@ -19,11 +19,12 @@ DECLARED_RISK = 2000
 DATA_FOLDER = "data/Weekly_Trade_Data_Uploads"
 
 
-def process_single_file(file_path, embedder, vector_store):
+def process_single_file(file_path, embedder, vector_store, declared_risk=None):
     """
     Runs full RiskHalo pipeline for a single weekly file
     and stores its summary in ChromaDB.
     """
+    risk = declared_risk if declared_risk is not None else DECLARED_RISK
 
     print(f"\n Processing file: {file_path}")
 
@@ -33,14 +34,14 @@ def process_single_file(file_path, embedder, vector_store):
     parser = TradeParser(file_path)
     df = parser.parse()
 
-    feature_df = FeatureEngine(df, DECLARED_RISK).run()
+    feature_df = FeatureEngine(df, risk).run()
     diagnosis = BehavioralEngine(feature_df).run()
 
     post_loss_trade_count = int(feature_df["post_loss_flag"].sum())
 
     impact = ExpectancyEngine(
         diagnosis,
-        DECLARED_RISK,
+        risk,
         len(feature_df),
         post_loss_trade_count
     ).run()
