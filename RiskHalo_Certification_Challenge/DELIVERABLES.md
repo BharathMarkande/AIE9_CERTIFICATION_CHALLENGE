@@ -201,3 +201,39 @@ When these keywords are detected, the system performs a targeted web search to r
     - If research-oriented keywords are detected, the Tavily API is triggered to retrieve relevant academic or conceptual references.
 6. Retrieved session summaries (and optional Tavily research context) are passed to the LLM along with a strict system prompt.
 7. The LLM generates a structured, data-grounded coaching response.
+
+
+### Task 4: Build End-to-End Prototype
+
+#### 9. Build an end-to-end prototype and deploy it to a local endpoint
+
+### Task 5: Evals
+
+#### 10. Assess your pipeline using the RAGAS framework, including the following key metrics: faithfulness, context precision, and context recall. Include any other metrics you feel are worthwhile to assess. Provide a table of your output results.
+
+*RAGAS Evaluation Assessment — Iteration 1 (Baseline)*
+
+In the initial version of the RiskHalo RAG pipeline, evaluation was conducted using persona-driven behavioral questions with a single concatenated raw document (all session summaries combined) as ground truth. Retrieval was purely semantic without behavioral-state filtering or multi-query expansion.
+
+Key Metrics evaluated were --> Context Recall, Context Precision, Faithfulness, Context Entity Recall, Answer Relevancy
+
+** BaseLine Results:**
+
+*RAGAS Evaluation Baseline Results - Overall metrics (mean):*
+*{'context_recall': 0.3340, 'context_entity_recall': 0.0854, 'context_precision': 0.8556, 'faithfulness': 0.8565, 'answer_relevancy': 0.8044}*
+
+
+| Sr.No. |user_input  |Context Recall|Context Entity Recall|Context Precision|Faithfulness|Answer Relevancy|
+|--------|------------|--------------|---------------------|-----------------|------------|----------------|
+|1|Why do my losses increase after a losing trade?|0.285714|0.118421    |       1.000000  |    0.954545   |       0.831649  |
+|2|Am I escalating risk after losses? |0.333333|0.023810    |       1.000000   |   1.000000    |      0.902358|
+|3|Why is my expectancy negative despite winning|0.000000|0.031250     |      1.000000   |   0.885714   |       0.772574  |
+|4|Am I cutting profits too early?|0.470588|0.131579    |       1.000000   |   0.791667       |   0.793664  |
+|5|I follow rules but still lose. Why? |0.636364| 0.105263     |      0.805556  |    0.781250     |     0.804136|
+|6|Is discipline enough to be profitable?|0.000000|0.090909   |        0.333333     | 0.933333      |    0.816046|
+|7|Am I improving over time? | 0.387097|   0.031250     |      1.000000  |    1.000000      |    0.737407 |
+|8|Is my recovery behavior healthy?|0.615385|0.171053   |        1.000000 |     0.857143    |      0.740529 |
+|9|Is there enough data to evaluate my behavior?|0.277778|0.018519    |       1.000000  |    0.611111  |        0.883237|
+|10|What can be inferred from a small sample? |NaN|  0.131579     |      0.416667    |  0.750000     |     0.762752|
+
+![RAGAS Evals baseline](deliverables/images/Ragas_Eval_baseline.png)
