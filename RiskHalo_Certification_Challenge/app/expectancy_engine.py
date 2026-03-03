@@ -112,6 +112,7 @@ def format_expectancy_summary(
     expectancy_post_R: float,
     expectancy_delta_R: float,
     economic_impact_rupees: float,
+    behavioral_state: str,
     risk_per_trade: float = None
 ) -> str:
     """
@@ -128,21 +129,103 @@ def format_expectancy_summary(
     if risk_per_trade:
         normal_rupees = round(normal_R * risk_per_trade)
         post_rupees = round(post_R * risk_per_trade)
+        delta_rupees = round(delta_R * risk_per_trade)
 
-        summary = (
-            "Performance Impact\n\n"
-            f"Normal trades: {normal_R}R (~₹{normal_rupees} per trade)\n"
-            f"After losses: {post_R}R (~₹{post_rupees} per trade)\n"
-            f"Behavioral shift: {delta_R}R per trade\n"
-            f"Estimated impact over period: ₹{impact_rupees}"
+        # --------------------------------------------------
+    # INSUFFICIENT DATA
+    # --------------------------------------------------
+    if behavioral_state == "INSUFFICIENT_POST_LOSS_DATA":
+        return (
+            "Performance Impact\n"
+            "There were insufficient post-loss trades to evaluate behavioral expectancy shift.\n"
+            "Expectancy comparison requires comparable trade groups.\n"
+            "No economic impact is inferred for this period."
         )
-    else:
-        summary = (
-            "Performance Impact\n\n"
+
+    # --------------------------------------------------
+    # STABLE
+    # --------------------------------------------------
+    if behavioral_state == "STABLE":
+        if risk_per_trade:
+            return (
+                "Performance Impact\n"
+                f"Your average trade outcome remained consistent at approximately ₹{normal_rupees} per trade.\n"
+                "There is no meaningful performance deterioration after losses.\n"
+                "Financial impact from behavioral distortion appears minimal."
+            )
+        else:
+            return (
+                "Performance Impact\n"
+                f"Your average trade outcome remained consistent at {normal_R}R per trade.\n"
+                "There is no meaningful performance deterioration after losses."
+            )
+
+    # --------------------------------------------------
+    # LOSS_ESCALATION
+    # --------------------------------------------------
+    if behavioral_state == "LOSS_ESCALATION":
+        if risk_per_trade:
+            return (
+                "Performance Impact\n"
+                f"In stable conditions, your trades averaged ₹{normal_rupees} per trade.\n"
+                f"After a loss, performance declined to an average loss of ₹{abs(post_rupees)} per trade.\n"
+                f"This deterioration reflects post-loss loss escalation behavior.\n"
+                f"Across the analyzed period, this behavioral shift reduced performance by approximately ₹{abs(impact_rupees)}."
+            )
+        else:
+            return (
+                "Performance Impact\n"
+                f"Normal trades averaged {normal_R}R per trade.\n"
+                f"After losses, trades averaged {post_R}R per trade.\n"
+                f"This deterioration reflects post-loss loss escalation behavior.\n"
+                f"Estimated impact over period: ₹{abs(impact_rupees)}."
+            )
+
+    # --------------------------------------------------
+    # CONFIDENCE_CONTRACTION
+    # --------------------------------------------------
+    if behavioral_state == "CONFIDENCE_CONTRACTION":
+        if risk_per_trade:
+            return (
+                "Performance Impact\n"
+                f"Baseline performance averaged ₹{normal_rupees} per trade.\n"
+                f"After losses, profitability declined to ₹{post_rupees} per trade.\n"
+                "This suggests profit compression rather than risk expansion.\n"
+                f"The resulting expectancy shift impacted performance by approximately ₹{abs(impact_rupees)}."
+            )
+        else:
+            return (
+                "Performance Impact\n"
+                f"Baseline performance averaged {normal_R}R per trade.\n"
+                f"After losses, performance shifted to {post_R}R per trade.\n"
+                "This suggests profit compression following losses."
+            )
+
+    # --------------------------------------------------
+    # ADAPTIVE_RECOVERY
+    # --------------------------------------------------
+    if behavioral_state == "ADAPTIVE_RECOVERY":
+        if risk_per_trade:
+            return (
+                "Performance Impact\n"
+                f"In stable conditions, trades averaged ₹{normal_rupees} per trade.\n"
+                f"After losses, performance improved to approximately ₹{post_rupees} per trade.\n"
+                "This indicates constructive behavioral adjustment rather than emotional distortion.\n"
+                f"The positive shift contributed approximately ₹{abs(impact_rupees)} over the period."
+            )
+        else:
+            return (
+                "Performance Impact\n"
+                f"Normal trades averaged {normal_R}R per trade.\n"
+                f"After losses, trades improved to {post_R}R per trade.\n"
+                "This indicates adaptive recovery behavior."
+            )
+            
+            
+    return (
+            "Performance Impact\n"
             f"Normal trades: {normal_R}R per trade\n"
             f"After losses: {post_R}R per trade\n"
             f"Behavioral shift: {delta_R}R per trade\n"
             f"Estimated impact over period: ₹{impact_rupees}"
         )
-
-    return summary

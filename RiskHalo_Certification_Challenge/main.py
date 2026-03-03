@@ -65,7 +65,10 @@ def process_single_file(file_path, embedder, vector_store):
 
     full_narrative = narrative.join("\n\n") + "\n\n" + rule_narrative
 
-    print(full_narrative)
+    print("=" * 60)
+    print(f"session_id: {session_id}")
+    print(f"Full narrative: {full_narrative}")
+    print("=" * 60)
 
     # ----------------------------
     # Embed Narrative
@@ -77,11 +80,12 @@ def process_single_file(file_path, embedder, vector_store):
     # ----------------------------
 
     metadata = {
+        "session_id": session_id,
         "behavioral_state": diagnosis["behavioral_state"],
         "severity_score": diagnosis["severity_score"],
         "discipline_score": rule_results["discipline_scores"]["overall_discipline_score"],
         "risk_breach_count": rule_results["violations"]["risk_breach_count"],
-        "rr_violation_count": rule_results["violations"]["rr_violation_count"],
+        "rr_violation_count": rule_results["violations"]["rr_violation_count"], # Risk:Reward violation count
         "overtrading_days": rule_results["violations"]["overtrading_days"],
         "daily_loss_breaches": rule_results["violations"]["daily_loss_breaches"],
     }
@@ -130,11 +134,6 @@ def run_pipeline():
             traceback.print_exc()
 
     print("\n  All weekly files processed successfully.")
-
-
-# Example coaching queries (optional)
-# print(ask_coach("Am I improving over time?"))
-# print(ask_coach("Why do traders escalate after losses?"))
 
 
 if __name__ == "__main__":

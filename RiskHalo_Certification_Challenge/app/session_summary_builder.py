@@ -221,6 +221,7 @@ class SessionSummaryBuilder:
             exp_post,
             exp_delta,
             rupee_impact,
+            state,
             risk_per_trade=self.expectancy.get("risk_per_trade")
         )
 
