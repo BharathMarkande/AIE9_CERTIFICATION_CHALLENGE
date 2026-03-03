@@ -178,6 +178,7 @@ The OpenAI API is not used for computing behavioral metrics. All calculations ar
 2. Tavily API (Web Search)
 
 RiskHalo integrates the Tavily API as an external web search tool to support research-oriented or conceptual user queries. The Tavily tool is triggered only when user input contains specific research-intent keywords such as:
+    
     - why
     - research
     - behavioral finance
