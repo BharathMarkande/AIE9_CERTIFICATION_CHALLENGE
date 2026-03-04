@@ -64,7 +64,7 @@ def process_single_file(file_path, embedder, vector_store, declared_risk=None):
     narrative = snapshot["narrative_summary"]
     rule_narrative = snapshot["rule_narrative"]
 
-    full_narrative = narrative.join("\n\n") + "\n\n" + rule_narrative
+    full_narrative = (narrative if isinstance(narrative, str) else "\n\n".join(narrative)) + "\n\n" + rule_narrative
 
     print("=" * 60)
     print(f"session_id: {session_id}")
@@ -80,11 +80,12 @@ def process_single_file(file_path, embedder, vector_store, declared_risk=None):
     # Store in ChromaDB with Metadata
     # ----------------------------
 
+    discipline_score = rule_results["discipline_scores"]["overall_discipline_score"]
     metadata = {
         "session_id": session_id,
         "behavioral_state": diagnosis["behavioral_state"],
         "severity_score": diagnosis["severity_score"],
-        "discipline_score": rule_results["discipline_scores"]["overall_discipline_score"],
+        "discipline_score": discipline_score,
         "risk_breach_count": rule_results["violations"]["risk_breach_count"],
         "rr_violation_count": rule_results["violations"]["rr_violation_count"], # Risk:Reward violation count
         "overtrading_days": rule_results["violations"]["overtrading_days"],
@@ -99,6 +100,27 @@ def process_single_file(file_path, embedder, vector_store, declared_risk=None):
     )
 
     print(f"Stored session in vector DB: {session_id}")
+
+    # ----------------------------
+    # Return analysis payload for API response
+    # ----------------------------
+    structured = snapshot["structured_summary"]
+    expectancy = {
+        "expectancy_normal_R": structured.get("expectancy_normal_R"),
+        "expectancy_post_R": structured.get("expectancy_post_R"),
+        "expectancy_delta_R": structured.get("expectancy_delta_R"),
+        "economic_impact_rupees": structured.get("economic_impact_rupees"),
+    }
+    behavioral_narrative = narrative if isinstance(narrative, str) else "\n\n".join(narrative)
+    return {
+        "session_id": session_id,
+        "behavioral_state": diagnosis["behavioral_state"],
+        "severity_score": round(float(diagnosis["severity_score"]), 2),
+        "expectancy_summary": expectancy,
+        "discipline_score": round(float(discipline_score), 2),
+        "narrative_summary": behavioral_narrative,
+        "rule_narrative": rule_narrative,
+    }
 
 
 def run_pipeline():

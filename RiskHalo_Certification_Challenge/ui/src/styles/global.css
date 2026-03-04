@@ -133,23 +133,36 @@ button:active:not(:disabled) {
 }
 
 .header-title {
-  font-family: var(--font-title);
+  font-family: Arial, sans-serif;
   font-weight: 800;
-  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-size: clamp(2rem, 4vw, 2.5rem);
   letter-spacing: 0.15em;
-  color: var(--soft-gray);
+  color: #fff;
+}
+
+.header-mid {
+  font-size: 1.2em;
 }
 
 .header-risk {
-  font-size: 1.35em;
+  font-size: 2.35em;
   color: var(--risk-red);
   text-shadow: 0 0 20px rgba(255, 59, 59, 0.4);
 }
 
 .header-halo {
-  font-size: 1.35em;
-  color: var(--electric-blue);
-  text-shadow: 0 0 20px var(--glow-blue);
+  font-size: 2.35em;
+  color: #22c55e;
+  text-shadow: 0 0 20px rgba(34, 197, 94, 0.4);
+}
+
+.header-tagline {
+  font-family: var(--font-body);
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: #fff;
+  margin-top: 0.35rem;
+  letter-spacing: 0.02em;
 }
 
 /* ---- Panels ---- */
@@ -251,6 +264,221 @@ button:active:not(:disabled) {
   color: var(--risk-red);
 }
 
+/* ---- Session Summary Card ---- */
+.session-summary-card {
+  padding: 1.25rem;
+}
+
+.session-summary-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.session-summary-title {
+  margin-bottom: 0;
+}
+
+.session-summary-dismiss {
+  background: none;
+  border: none;
+  color: var(--soft-gray);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0.25rem;
+  opacity: 0.8;
+}
+
+.session-summary-dismiss:hover {
+  color: #fff;
+  opacity: 1;
+}
+
+.session-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.session-summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.session-summary-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--soft-gray);
+  opacity: 0.9;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.session-summary-info-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.session-summary-info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  border: 1px solid var(--electric-blue);
+  color: var(--electric-blue);
+  font-size: 0.7rem;
+  font-weight: 700;
+  font-style: italic;
+  font-family: var(--font-body);
+  cursor: help;
+  flex-shrink: 0;
+  transition: background 0.2s ease, color 0.2s ease;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  line-height: 1;
+}
+
+.session-summary-info-icon:hover {
+  background: rgba(0, 194, 255, 0.15);
+  color: var(--neon-cyan);
+}
+
+.session-summary-info-tooltip {
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 0.5rem);
+  transform: translateX(-50%) translateY(2px);
+  min-width: 240px;
+  max-width: 320px;
+  padding: 0.75rem 1rem;
+  background: rgba(11, 17, 32, 0.98);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  font-size: 0.8rem;
+  font-weight: 400;
+  font-style: normal;
+  line-height: 1.45;
+  color: var(--soft-gray);
+  text-align: left;
+  white-space: normal;
+  z-index: 10;
+  transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+}
+
+.session-summary-info-tooltip strong {
+  display: block;
+  color: var(--electric-blue);
+  margin-bottom: 0.35rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.session-summary-info-wrap:hover .session-summary-info-tooltip {
+  visibility: visible;
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.session-summary-info-wrap:focus-within .session-summary-info-tooltip {
+  visibility: visible;
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.session-summary-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.session-summary-state {
+  color: var(--electric-blue);
+  font-family: var(--font-title);
+  font-size: 0.9rem;
+}
+
+.session-summary-expectancy,
+.session-summary-discipline {
+  font-size: 0.95rem;
+}
+
+.session-summary-expand {
+  border-top: 1px solid var(--card-border);
+  padding-top: 1rem;
+}
+
+.session-summary-expand-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: none;
+  border: 1px solid var(--card-border);
+  color: var(--electric-blue);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.session-summary-expand-btn:hover {
+  border-color: var(--electric-blue);
+  box-shadow: 0 0 12px var(--glow-blue);
+}
+
+.session-summary-expand-icon {
+  font-size: 0.75rem;
+}
+
+.session-summary-narrative-wrap {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.session-summary-narrative-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.session-summary-narrative-heading {
+  font-family: var(--font-title);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--electric-blue);
+  margin: 0;
+}
+
+.session-summary-narrative {
+  padding: 1rem;
+  background: rgba(10, 20, 40, 0.5);
+  border-radius: 8px;
+  border: 1px solid var(--card-border);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--soft-gray);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 /* ---- Chat ---- */
 .chat-panel {
   flex: 1;
@@ -301,15 +529,27 @@ button:active:not(:disabled) {
 }
 
 .chat-message-user .chat-message-bubble {
-  background: rgba(0, 194, 255, 0.15);
-  border: 1px solid rgba(0, 194, 255, 0.3);
-  color: var(--soft-gray);
+  background: linear-gradient(135deg, #fef9c3 0%, #38bdf8 100%);
+  border: 1px solid rgba(250, 204, 21, 0.5);
+  color: #0b1120;
+  box-shadow: 0 0 14px rgba(250, 204, 21, 0.25);
 }
 
 .chat-message-assistant .chat-message-bubble {
-  background: rgba(20, 35, 60, 0.7);
-  border: 1px solid var(--card-border);
-  color: var(--soft-gray);
+  background: rgba(10, 20, 40, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  color: #e5e7eb;
+}
+
+.chat-message-assistant .chat-heading-line {
+  margin-bottom: 0.35rem;
+}
+
+.chat-message-assistant .chat-heading {
+  display: inline-block;
+  color: #facc15;
+  font-weight: 600;
+  letter-spacing: 0.03em;
 }
 
 .streaming-bubble {

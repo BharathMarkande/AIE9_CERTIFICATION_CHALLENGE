@@ -49,6 +49,7 @@ export default function UploadPanel({ onUploadSuccess, onUploadError }) {
       setMessage(result.message || 'Session analyzed successfully.')
       setIsError(false)
       onUploadSuccess?.(result)
+      // Result may include: behavioral_state, severity_score, expectancy_summary, discipline_score, narrative_summary
     } catch (err) {
       const msg = err.message || 'Upload failed'
       setMessage(msg)

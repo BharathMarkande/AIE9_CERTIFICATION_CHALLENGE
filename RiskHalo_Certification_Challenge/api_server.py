@@ -64,8 +64,17 @@ async def upload(
                 f.write(await file.read())
             embedder = get_embedder()
             vector_store = get_vector_store()
-            process_single_file(path, embedder, vector_store, declared_risk=risk_per_trade)
-            return {"success": True, "message": "Session analyzed successfully."}
+            analysis = process_single_file(path, embedder, vector_store, declared_risk=risk_per_trade)
+            return {
+                "success": True,
+                "message": "Session analyzed successfully.",
+                "behavioral_state": analysis["behavioral_state"],
+                "severity_score": analysis["severity_score"],
+                "expectancy_summary": analysis["expectancy_summary"],
+                "discipline_score": analysis["discipline_score"],
+                "narrative_summary": analysis["narrative_summary"],
+                "rule_narrative": analysis["rule_narrative"],
+            }
         finally:
             try:
                 os.unlink(path)
