@@ -1,46 +1,69 @@
 # AIE09 Certification Challenge
 
-# RiskHalo - A Behavioral Risk Intelligence Engine for Intraday Traders
+## RiskHalo – Behavioral Risk Intelligence Engine for Intraday Traders
 
-## Project Structure
+### Project Structure (latest)
 
 ```
 RiskHalo_Certification_Challenge/
 │
-├── app/                            # Deterministic Analytics Layer
-│   ├── parser.py                   # Input parsing and preprocessing
-│   ├── feature_engine.py           # Feature extraction and transformation
-│   ├── behavioral_engine.py        # Behavioral pattern analysis
-│   ├── expectancy_engine.py        # Expectancy metrics computation
-│   ├── session_summary_builder.py  # Creates snapshot object ready for embedding and vector database storage
-│
-├── rag/                    # Memory & Retrieval Layer
-│   ├── embedder.py         # Text embedding
-│   ├── vector_store.py     # Vector storage and indexing
-│   ├── retriever.py        # Semantic retrieval
-│
-├── agents/                 # Agentic RAG Layer
-│   ├── coach_agent.py      # Coaching and guidance agent
-│
-├── evaluation/              # RAGAS Evaluation Layer
-│   ├── synthetic_dataset.py # Synthetic data generation
-│   ├── ragas_eval.py        # RAGAS evaluation metrics
-│
-├── ui/                     # Demo Interface
-│   ├── streamlit_app.py    # Streamlit web application
-│
-├── README.md
-└── requirements.txt
+├── app/                        # Deterministic analytics & session processing
+├── rag/                        # Memory & retrieval (embeddings, vector DB, retrievers)
+├── agents/                     # Agentic RAG layer (e.g. coach agent)
+├── evaluation/                 # RAGAS evaluation scripts & configs
+├── ui/                         # React + Vite frontend
+├── config/                     # Config files (models, retrievers, evaluation, etc.)
+├── data/                       # Input / synthetic data and processed artifacts
+├── tests/                      # Automated tests
+├── chroma_db/                  # Local vector DB (created at runtime)
+├── api_server.py               # FastAPI backend (upload + ask endpoints)
+├── main.py                     # Core processing entrypoint
+├── pyproject.toml              # Python project & dependencies
+└── uv.lock                     # Locked dependency versions
 ```
 
-## Setup
+### Backend Setup
 
-1. Install dependencies:
-   ```bash
-   uv sync
-   ```
+- **1. Create & activate virtual environment (optional if already using `.venv`):**
 
-2. Run the Streamlit app:
-   ```bash
-   streamlit run ui/streamlit_app.py
-   ```
+```bash
+uv sync
+```
+
+- **2. Configure environment:**
+
+Create a `.env` file in the project root and set required keys (OPENAI_API_KEY, TAVILY_API_KEY) and ensure `data/Weekly_Trade_Data_Uploads` exists.
+
+- **3. Run the FastAPI server from project root:**
+
+```bash
+uvicorn api_server:app --reload --port 8000
+```
+
+The backend will be available at `http://localhost:8000`.
+
+### Frontend Setup
+
+From the `ui` directory:
+
+```bash
+cd ui
+npm install
+npm run dev
+```
+
+The frontend runs at `http://localhost:5173` and will call the backend at `http://localhost:8000` by default (configurable via `VITE_API_BASE`).
+
+### Running RAGAS Evaluation
+
+- **Multi-query retriever (default):**
+
+```bash
+python -m evaluation.run_ragas_evaluation
+```
+
+- **Baseline single-query retriever:**
+
+```bash
+python -m evaluation.run_ragas_evaluation --baseline
+```
