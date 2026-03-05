@@ -11,6 +11,7 @@ RiskHalo_Certification_Challenge/
 ├── rag/                        # Memory & retrieval (embeddings, vector DB, retrievers)
 ├── agents/                     # Agentic RAG layer (e.g. coach agent)
 ├── evaluation/                 # RAGAS evaluation scripts & configs
+├── deliverables/               # Challenge deliverables (docs, videos, images)
 ├── ui/                         # React + Vite frontend
 ├── config/                     # Config files (models, retrievers, evaluation, etc.)
 ├── data/                       # Input / synthetic data and processed artifacts

@@ -154,6 +154,8 @@ These are invoked before RAG and provide structured truth.
 
 The default chunking strategy is session-level semantic chunking, where each weekly trading session summary is stored as a single self-contained document in the vector database. Each chunk includes structured behavioral metrics (behavioral_state, severity_score, expectancy metrics, rule compliance metrics) along with a narrative summary and associated metadata. No further splitting is performed within a session.
 
+Chunking Strategy: Session level semantic chunking where *each weekly session summary = one chunk*
+
 **Rationale:**
 
 This decision was made because each weekly session summary is already a logically atomic and semantically coherent unit. Splitting sessions into smaller chunks (e.g: paragraph-level) would risk separating closely related behavioral metrics and weakening contextual integrity, thereby reducing grounding quality during retrieval. Since RiskHalo performs analysis at the session level (behavioral state and expectancy are computed per session), session-level chunking preserves metric cohesion, improves retrieval precision and aligns directly with the system's deterministic architecture.
