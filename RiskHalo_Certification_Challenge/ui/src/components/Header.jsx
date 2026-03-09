@@ -11,10 +11,9 @@ export default function Header() {
         />
         <div className="header-text">
           <h1 className="header-title riskhalo-logo">
-            <span className="header-risk">R</span>
-            <span className="header-mid">ISK</span>
+            <span>RISK</span>
             <span className="header-hal">HAL</span>
-            <span className="header-mid">O</span>
+            <span>O</span>
           </h1>
           <p className="header-subtitle">Behavioral Intelligence for Traders</p>
         </div>
