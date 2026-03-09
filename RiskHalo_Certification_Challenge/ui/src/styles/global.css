@@ -115,6 +115,54 @@ button:active:not(:disabled) {
   padding: 1rem;
 }
 
+/* ---- Hero / Oscillating Headline ---- */
+.oscillating-hero-section {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: center;
+  background: #000000;
+}
+
+.oscillating-hero-inner {
+  width: 100%;
+  max-width: 1100px;
+  padding: 1.75rem 1.5rem;
+  text-align: center;
+}
+
+/* Remove glass border/glow for hero, keep pure black background */
+.oscillating-hero-inner.glass-card {
+  background: #000000;
+  border: none;
+  box-shadow: none;
+}
+
+.oscillating-headline-wrapper {
+  position: relative;
+  overflow: hidden;
+  height: 4.5em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.oscillating-headline-text {
+  display: block;
+  font-family: var(--font-title); /* same as RISKHALO logo */
+  font-weight: 800;
+  font-size: clamp(1.6rem, 3.4vw, 2.2rem); /* match header-title size curve */
+  line-height: 1.1;
+  letter-spacing: 0.22em; /* match header-title tracking */
+  text-transform: uppercase;
+  background: linear-gradient(120deg, #f1b75a, #ffffff); /* gold → white to echo HAL */
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
 .main {
   flex: 1;
   display: flex;

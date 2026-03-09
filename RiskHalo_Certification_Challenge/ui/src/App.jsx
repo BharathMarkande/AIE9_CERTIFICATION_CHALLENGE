@@ -3,6 +3,7 @@ import Header from './components/Header'
 import UploadPanel from './components/UploadPanel'
 import SessionSummaryCard from './components/SessionSummaryCard'
 import ChatWindow from './components/ChatWindow'
+import { OscillatingHeadlineSection } from './components/OscillatingHeadline'
 
 export default function App() {
   const [sessionAnalysis, setSessionAnalysis] = useState(null)
@@ -25,6 +26,7 @@ export default function App() {
       <div className="app-backdrop" aria-hidden />
       <Header />
       <main className="main">
+        <OscillatingHeadlineSection />
         <UploadPanel onUploadSuccess={handleUploadSuccess} />
         {sessionAnalysis && (
           <SessionSummaryCard
