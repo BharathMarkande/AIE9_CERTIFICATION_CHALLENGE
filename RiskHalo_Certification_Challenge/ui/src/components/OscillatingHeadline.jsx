@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 
 const phrases = [
   'Detect emotional bias.',
+  'Identify loss escalation.',
   'Control risk.',
   'Trade with discipline.',
 ]
