@@ -45,7 +45,7 @@ export default function ChatWindow() {
 
   return (
     <section className="glass-card chat-panel">
-      <h2 className="panel-title">Coach</h2>
+      <h2 className="panel-title">RiskHalo AI Coach</h2>
       <div className="chat-window" ref={scrollRef}>
         {messages.length === 0 && !isStreaming && (
           <p className="chat-placeholder">

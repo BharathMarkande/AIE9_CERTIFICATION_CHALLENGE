@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { uploadSession } from '../services/api'
 
 const RISK_STORAGE_KEY = 'riskhalo_risk_per_trade'
@@ -16,6 +16,8 @@ export default function UploadPanel({ onUploadSuccess, onUploadError }) {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState(null)
   const [isError, setIsError] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
+  const fileInputRef = useRef(null)
 
   useEffect(() => {
     try {
@@ -27,6 +29,29 @@ export default function UploadPanel({ onUploadSuccess, onUploadError }) {
     const f = e.target.files?.[0]
     setFile(f || null)
     setMessage(null)
+  }
+
+  const handleDragOver = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(true)
+  }
+
+  const handleDragLeave = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+  }
+
+  const handleDrop = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+    const f = e.dataTransfer?.files?.[0]
+    if (f && (f.name.endsWith('.xlsx') || f.name.endsWith('.xls'))) {
+      setFile(f)
+      setMessage(null)
+    }
   }
 
   const handleSubmit = async (e) => {
@@ -62,20 +87,30 @@ export default function UploadPanel({ onUploadSuccess, onUploadError }) {
 
   return (
     <section className="glass-card upload-panel">
-      <h2 className="panel-title">Upload Session</h2>
+      <h2 className="panel-title upload-panel-title">Upload Trading Session</h2>
       <form onSubmit={handleSubmit} className="upload-form">
-        <div className="form-row">
-          <label className="label">Weekly trade file (.xlsx)</label>
+        <div
+          className={`upload-dropzone ${isDragging ? 'upload-dropzone--active' : ''} ${file ? 'upload-dropzone--has-file' : ''}`}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          onClick={() => fileInputRef.current?.click()}
+        >
           <input
+            ref={fileInputRef}
             type="file"
             accept=".xlsx,.xls"
             onChange={handleFileChange}
-            className="input-file"
+            className="upload-dropzone-input"
             disabled={loading}
           />
+          <span className="upload-dropzone-icon">📄</span>
+          <span className="upload-dropzone-text">
+            {file ? file.name : 'Drag & Drop Trade Journal (.xlsx)'}
+          </span>
         </div>
         <div className="form-row">
-          <label className="label">Risk per trade</label>
+          <label className="label">Risk per Trade</label>
           <input
             type="number"
             min={1}
@@ -85,14 +120,14 @@ export default function UploadPanel({ onUploadSuccess, onUploadError }) {
             disabled={loading}
           />
         </div>
-        <button type="submit" className="btn-primary" disabled={loading}>
+        <button type="submit" className="btn-primary btn-behavioral" disabled={loading}>
           {loading ? (
             <>
               <span className="spinner" aria-hidden />
               Analyzing...
             </>
           ) : (
-            'Analyze Session'
+            'Run Behavioral Risk Analysis'
           )}
         </button>
       </form>

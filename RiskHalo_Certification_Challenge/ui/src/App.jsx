@@ -27,14 +27,30 @@ export default function App() {
       <Header />
       <main className="main">
         <OscillatingHeadlineSection />
-        <UploadPanel onUploadSuccess={handleUploadSuccess} />
-        {sessionAnalysis && (
-          <SessionSummaryCard
-            analysis={sessionAnalysis}
-            onDismiss={() => setSessionAnalysis(null)}
-          />
-        )}
-        <ChatWindow />
+        <div className="main-panels">
+          <UploadPanel onUploadSuccess={handleUploadSuccess} />
+          {sessionAnalysis && (
+            <SessionSummaryCard
+              analysis={sessionAnalysis}
+              onDismiss={() => setSessionAnalysis(null)}
+            />
+          )}
+          {!sessionAnalysis && (
+            <section className="glass-card session-summary-card session-summary-card--empty">
+              <h2 className="panel-title session-summary-title">Trading Session Analysis</h2>
+              <p className="session-summary-empty-copy">
+                Upload a weekly trade journal on the left to see your behavioral risk profile,
+                expectancy damage, and AI-generated insights here.
+              </p>
+            </section>
+          )}
+          <ChatWindow />
+        </div>
+        <footer className="app-footer">
+          <p className="app-footer-text">
+          AIE09 Certification Challenge - RiskHalo prototype - By BHARATH MARKANDE
+          </p>
+        </footer>
       </main>
     </div>
   )

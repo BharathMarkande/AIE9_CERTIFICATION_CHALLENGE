@@ -28,7 +28,7 @@ body {
   font-family: var(--font-body);
   background: #000000;
   color: var(--soft-gray);
-  overflow-x: hidden;
+  overflow: hidden; /* keep full dashboard within viewport, no page scroll */
   line-height: 1.5;
 }
 
@@ -168,9 +168,51 @@ button:active:not(:disabled) {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  max-width: 900px;
-  margin: 0 auto;
   width: 100%;
+  max-width: none;
+  margin: 0;
+  min-height: 0;
+  min-width: 0; /* allow main to shrink, prevent overflow */
+}
+
+.main-panels {
+  display: grid;
+  /* 24:38:38 ratio - use fr so gap is included and grid doesn't overflow */
+  grid-template-columns: minmax(0, 24fr) minmax(0, 38fr) minmax(0, 38fr);
+  gap: 1.25rem;
+  align-items: stretch;
+  width: 100%;
+  min-width: 0; /* allow grid to shrink within flex parent */
+  min-height: 0;
+  height: calc(100vh - 380px);
+  color: #ffffff;
+}
+
+.main-panels * {
+  color: #ffffff;
+}
+
+.main-panels input::placeholder,
+.main-panels textarea::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.app-footer {
+  margin-top: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.25);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--soft-gray);
+  opacity: 0.8;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.app-footer-text {
+  margin: 0;
 }
 
 /* ---- Header / Title ---- */
@@ -260,10 +302,82 @@ button:active:not(:disabled) {
   padding: 1.25rem;
 }
 
+.upload-panel-title {
+  font-family: 'Inter', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #ffffff;
+}
+
+.main-panels .session-summary-title,
+.chat-panel .panel-title {
+  color: #ffffff;
+}
+
+.chat-panel .panel-title {
+  font-family: 'Inter', sans-serif;
+  text-transform: uppercase;
+}
+
 .upload-form {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.25rem;
+}
+
+.upload-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 100px;
+  padding: 1.25rem;
+  border: 2px dashed rgba(148, 163, 184, 0.35);
+  border-radius: 10px;
+  background: rgba(10, 20, 40, 0.4);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.upload-dropzone:hover {
+  border-color: rgba(0, 194, 255, 0.4);
+  background: rgba(0, 194, 255, 0.06);
+}
+
+.upload-dropzone--active {
+  border-color: var(--electric-blue);
+  background: rgba(0, 194, 255, 0.1);
+}
+
+.upload-dropzone--has-file {
+  border-style: solid;
+  border-color: rgba(0, 255, 224, 0.35);
+  background: rgba(0, 255, 224, 0.06);
+}
+
+.upload-dropzone-input {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.upload-dropzone-icon {
+  font-size: 1.75rem;
+  opacity: 0.8;
+}
+
+.upload-dropzone-text {
+  font-size: 0.9rem;
+  color: #ffffff;
+  text-align: center;
+}
+
+.upload-dropzone--has-file .upload-dropzone-text {
+  color: #ffffff;
+  font-weight: 500;
 }
 
 .form-row {
@@ -278,6 +392,10 @@ button:active:not(:disabled) {
   font-weight: 500;
 }
 
+.upload-panel .label {
+  color: #ffffff;
+}
+
 .input-file,
 .input-number {
   padding: 0.6rem 0.75rem;
@@ -287,6 +405,11 @@ button:active:not(:disabled) {
   color: var(--soft-gray);
   font-family: var(--font-body);
   font-size: 0.95rem;
+}
+
+.upload-panel .input-number {
+  color: #ffffff;
+  border: 1px solid rgba(148, 163, 184, 0.45);
 }
 
 .input-number {
@@ -307,6 +430,17 @@ button:active:not(:disabled) {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+.upload-panel .btn-behavioral {
+  align-self: stretch;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--electric-blue) 0%, #0099cc 100%);
+  color: var(--deep-navy);
+}
+
+.upload-panel .btn-behavioral:hover:not(:disabled) {
+  box-shadow: 0 0 16px var(--glow-blue);
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -350,6 +484,18 @@ button:active:not(:disabled) {
   padding: 1.25rem;
 }
 
+.session-summary-card--empty {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.session-summary-empty-copy {
+  font-size: 0.9rem;
+  color: var(--soft-gray);
+  opacity: 0.9;
+}
+
 .session-summary-header {
   display: flex;
   align-items: center;
@@ -358,6 +504,8 @@ button:active:not(:disabled) {
 }
 
 .session-summary-title {
+  font-family: Inter;
+  text-transform: uppercase;
   margin-bottom: 0;
 }
 
@@ -569,6 +717,16 @@ button:active:not(:disabled) {
   padding: 1.25rem;
 }
 
+/* Make the three main dashboard panels fill the main-panels height */
+.main-panels > .glass-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #000000; /* keep panels pure black */
+  border: 1px solid rgba(148, 163, 184, 0.45); /* slightly brighter outline so panel edges are visible */
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.9), 0 18px 40px rgba(0, 0, 0, 0.75);
+}
+
 .chat-window {
   flex: 1;
   overflow-y: auto;
@@ -678,39 +836,106 @@ button:active:not(:disabled) {
   flex-shrink: 0;
   position: sticky;
   bottom: 0;
-  background: linear-gradient(180deg, transparent 0%, var(--card-bg) 12px);
-  padding-top: 0.5rem;
+  margin-top: auto;
+  padding: 1rem 0 0;
+  border-top: 1px solid rgba(148, 163, 184, 0.35);
+  background: linear-gradient(180deg, transparent 0%, #000000 100%);
 }
 
 .chat-input-form {
   display: flex;
-  gap: 0.5rem;
-  align-items: flex-end;
+  gap: 0.75rem;
+  align-items: stretch;
+  padding: 0.75rem;
+  background: #000000;
+  border: none;
+  border-radius: 12px;
+  transition: box-shadow 0.2s ease;
+}
+
+.chat-input-wrapper {
+  flex: 1;
+  position: relative;
+  min-height: 44px;
+  display: flex;
+}
+
+.chat-input-typing-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  pointer-events: auto;
+  cursor: text;
+  color: #8a94a6;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* Override .main-panels * { color: #ffffff } - typing placeholder must stay light grey */
+.chat-input-form .chat-input-typing-overlay,
+.chat-input-form .chat-input-typing-text,
+.chat-input-form .chat-input-typing-cursor {
+  color: #8a94a6 !important;
+}
+
+.chat-input-typing-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.chat-input-typing-cursor {
+  color: #8a94a6;
+  animation: typingCursorBlink 1s step-end infinite;
+  margin-left: 2px;
+}
+
+@keyframes typingCursorBlink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.chat-input-form:focus-within {
+  box-shadow: none;
 }
 
 .chat-input {
   flex: 1;
-  padding: 0.65rem 1rem;
-  border-radius: 10px;
-  border: 1px solid var(--card-border);
-  background: rgba(10, 20, 40, 0.6);
-  color: var(--soft-gray);
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  background: #000000;
+  color: #ffffff;
   font-family: var(--font-body);
   font-size: 0.95rem;
+  line-height: 1.5;
   resize: none;
   min-height: 44px;
   max-height: 120px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.chat-input:focus {
+  outline: none;
+  border-color: var(--electric-blue);
+  box-shadow: 0 0 0 2px rgba(0, 194, 255, 0.15);
 }
 
 .chat-input::placeholder {
-  color: var(--soft-gray);
-  opacity: 0.6;
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .btn-send {
-  padding: 0.65rem 1.1rem;
-  border-radius: 10px;
-  border: none;
+  padding: 0.75rem 1.25rem;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 194, 255, 0.4);
   background: linear-gradient(135deg, var(--electric-blue) 0%, #0099cc 100%);
   color: var(--deep-navy);
   font-family: var(--font-body);
@@ -718,10 +943,11 @@ button:active:not(:disabled) {
   font-size: 0.9rem;
   cursor: pointer;
   flex-shrink: 0;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .btn-send:hover:not(:disabled) {
-  box-shadow: 0 0 16px var(--glow-blue);
+  box-shadow: 0 0 20px var(--glow-blue), 0 0 40px rgba(0, 194, 255, 0.15);
 }
 
 .btn-send:disabled {
@@ -734,4 +960,10 @@ button:active:not(:disabled) {
   .app { padding: 1.5rem; }
   .main { gap: 1.75rem; }
   .chat-message-bubble { max-width: 78%; }
+}
+
+@media (max-width: 1023px) {
+  .main-panels {
+    grid-template-columns: 1fr;
+  }
 }
