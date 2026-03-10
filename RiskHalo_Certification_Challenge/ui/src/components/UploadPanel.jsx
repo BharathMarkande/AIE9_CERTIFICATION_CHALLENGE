@@ -73,6 +73,8 @@ export default function UploadPanel({ onUploadSuccess, onUploadError }) {
       const result = await uploadSession(file, riskPerTrade)
       setMessage(result.message || 'Session analyzed successfully.')
       setIsError(false)
+      setFile(null)
+      if (fileInputRef.current) fileInputRef.current.value = ''
       onUploadSuccess?.(result)
       // Result may include: behavioral_state, severity_score, expectancy_summary, discipline_score, narrative_summary
     } catch (err) {

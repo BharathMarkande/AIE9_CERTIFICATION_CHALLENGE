@@ -1,13 +1,21 @@
 import React, { useState } from 'react'
 
+const BEHAVIORAL_ITEMS = [
+  { label: 'STABLE', desc: 'Your performance stays consistent regardless of recent losses.' },
+  { label: 'LOSS_ESCALATION', desc: 'Your losses become larger after losing trades (emotional risk escalation or revenge trading).' },
+  { label: 'CONFIDENCE_CONTRACTION', desc: 'Your winning trades shrink after losses (hesitation or reduced conviction).' },
+  { label: 'ADAPTIVE_RECOVERY', desc: 'Your performance improves after losses, showing resilience.' },
+]
+
 const METRIC_INFO = {
   behavioral_state: {
     title: 'Behavioral State',
-    body: 'How you trade after a losing trade compared to normal conditions. 1. STABLE — Your performance stays consistent regardless of recent losses. 2. LOSS_ESCALATION — Your losses become larger after losing trades (emotional risk escalation or revenge trading). 3. CONFIDENCE_CONTRACTION — Your winning trades shrink after losses (hesitation or reduced conviction). 4. ADAPTIVE_RECOVERY — Your performance improves after losses, showing resilience.',
+    intro: 'How you trade after a losing trade compared to normal conditions:',
+    items: BEHAVIORAL_ITEMS,
   },
   severity: {
-    title: 'Severity',
-    body: 'This measures how strongly your performance changes after losses — closer to 0 means stable, closer to 1 means highly distorted.',
+    title: 'Severity Level',
+    body: 'This measures how strongly your performance changes after losses — closer to 0 means stable, closer to 1 means highly distorted. Displayed on a 1–5 scale.',
   },
   expectancy: {
     title: 'Expectancy Impact',
@@ -19,22 +27,38 @@ const METRIC_INFO = {
   },
 }
 
-function InfoTooltip({ id, metricKey }) {
+function InfoTooltip({ id, metricKey, variant }) {
   const info = METRIC_INFO[metricKey]
   if (!info) return null
+  const isBehavioral = metricKey === 'behavioral_state'
   return (
     <span className="session-summary-info-wrap">
       <button
         type="button"
-        className="session-summary-info-icon"
+        className={`session-summary-info-icon ${variant ? `session-summary-info-icon--${variant}` : ''}`}
         aria-label={`Information: ${info.title}`}
         aria-describedby={id}
       >
-        i
+        ?
       </button>
-      <span id={id} className="session-summary-info-tooltip" role="tooltip">
+      <span
+        id={id}
+        className={`session-summary-info-tooltip ${isBehavioral ? 'session-summary-info-tooltip--behavioral' : ''}`}
+        role="tooltip"
+      >
         <strong>{info.title}</strong>
-        <span>{info.body}</span>
+        {isBehavioral ? (
+          <div className="session-summary-tooltip-body">
+            <p className="session-summary-tooltip-intro">{info.intro}</p>
+            {info.items.map((item, i) => (
+              <div key={i} className="session-summary-tooltip-item">
+                <strong>{i + 1}. {item.label}</strong> — {item.desc}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <span>{info.body}</span>
+        )}
       </span>
     </span>
   )
@@ -72,10 +96,32 @@ export default function SessionSummaryCard({ analysis, onDismiss }) {
     return parts.join(' · ')
   }
 
+  // Map severity 0–1 to 1–5 scale for display
+  const severityLevel = severity_score != null
+    ? Math.min(5, Math.max(1, Math.round(severity_score * 5)))
+    : null
+
+  // Format behavioral state for display (e.g. LOSS_ESCALATION → LOSS / ESCALATION)
+  const formatBehavioralState = (state) => {
+    if (!state) return { primary: '—', secondary: '' }
+    const parts = String(state).split('_')
+    if (parts.length >= 2) {
+      return { primary: parts[0], secondary: parts.slice(1).join(' ') }
+    }
+    return { primary: state, secondary: '' }
+  }
+  const behavioralDisplay = formatBehavioralState(behavioral_state)
+  const isPositiveBehavioral = ['STABLE', 'ADAPTIVE_RECOVERY'].includes(String(behavioral_state || '').toUpperCase())
+
+  // Emojis for each metric
+  const BEHAVIORAL_EMOJI = '🧠'
+  const SEVERITY_EMOJI = '⚠️'
+  const DISCIPLINE_EMOJI = '🎯'
+
   return (
     <section className="glass-card session-summary-card" aria-label="Session analysis">
       <div className="session-summary-header">
-        <h2 className="panel-title session-summary-title">Session Analysis</h2>
+        <h2 className="panel-title session-summary-title">trading Session Analysis</h2>
         {onDismiss && (
           <button
             type="button"
@@ -89,35 +135,60 @@ export default function SessionSummaryCard({ analysis, onDismiss }) {
       </div>
 
       <div className="session-summary-grid">
-        <div className="session-summary-item">
-          <span className="session-summary-label">
-            Behavioral State
-            <InfoTooltip id="info-behavioral-state" metricKey="behavioral_state" />
-          </span>
-          <span className="session-summary-value session-summary-state">{behavioral_state ?? '—'}</span>
+        <div className={`session-summary-card-item session-summary-card-behavioral ${isPositiveBehavioral ? 'session-summary-card-positive' : ''}`}>
+          <div className="session-summary-card-header">
+            <span className="session-summary-card-title">BEHAVIORAL STATE</span>
+            <InfoTooltip id="info-behavioral-state" metricKey="behavioral_state" variant="red" />
+          </div>
+          <div className="session-summary-card-body">
+            <span className="session-summary-card-emoji" aria-hidden>{BEHAVIORAL_EMOJI}</span>
+            <div className="session-summary-card-value-wrap">
+              <span className="session-summary-card-value session-summary-state-value">
+                {behavioralDisplay.primary}
+              </span>
+              {behavioralDisplay.secondary && (
+                <span className="session-summary-card-value-secondary">{behavioralDisplay.secondary}</span>
+              )}
+            </div>
+          </div>
         </div>
-        <div className="session-summary-item">
-          <span className="session-summary-label">
-            Severity
-            <InfoTooltip id="info-severity" metricKey="severity" />
-          </span>
-          <span className="session-summary-value">{severity_score != null ? severity_score : '—'}</span>
+
+        <div className="session-summary-card-item session-summary-card-severity">
+          <div className="session-summary-card-header">
+            <span className="session-summary-card-title">SEVERITY LEVEL</span>
+            <InfoTooltip id="info-severity" metricKey="severity" variant="yellow" />
+          </div>
+          <div className="session-summary-card-body session-summary-card-body-severity">
+            <span className="session-summary-card-emoji" aria-hidden>{SEVERITY_EMOJI}</span>
+            <div className="session-summary-card-value-wrap">
+              <span className="session-summary-card-value session-summary-severity-value">
+                {severityLevel != null ? `${severityLevel}/5` : '—'}
+              </span>
+              {severityLevel != null && (
+                <div className="session-summary-severity-bar" role="meter" aria-valuenow={severityLevel} aria-valuemin={1} aria-valuemax={5}>
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <span
+                      key={i}
+                      className={`session-summary-severity-segment ${i <= severityLevel ? 'active' : ''}`}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
-        <div className="session-summary-item">
-          <span className="session-summary-label">
-            Expectancy Impact
-            <InfoTooltip id="info-expectancy" metricKey="expectancy" />
-          </span>
-          <span className="session-summary-value session-summary-expectancy">{formatExpectancy()}</span>
-        </div>
-        <div className="session-summary-item">
-          <span className="session-summary-label">
-            Discipline Score
-            <InfoTooltip id="info-discipline" metricKey="discipline" />
-          </span>
-          <span className="session-summary-value session-summary-discipline">
-            {discipline_score != null ? `${discipline_score}/100` : '—'}
-          </span>
+
+        <div className="session-summary-card-item session-summary-card-discipline">
+          <div className="session-summary-card-header">
+            <span className="session-summary-card-title">DISCIPLINE SCORE</span>
+            <InfoTooltip id="info-discipline" metricKey="discipline" variant="cyan" />
+          </div>
+          <div className="session-summary-card-body">
+            <span className="session-summary-card-emoji" aria-hidden>{DISCIPLINE_EMOJI}</span>
+            <span className="session-summary-card-value session-summary-discipline-value">
+              {discipline_score != null ? `${discipline_score}/100` : '—'}
+            </span>
+          </div>
         </div>
       </div>
 

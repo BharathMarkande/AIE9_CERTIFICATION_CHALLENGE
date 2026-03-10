@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 
 const phrases = [
-  'Detect emotional bias.',
-  'Identify loss escalation.',
-  'Control risk.',
-  'Trade with discipline.',
+  'Detect emotional bias',
+  'Identify loss escalation',
+  'Control risk',
+  'Trade with discipline',
 ]
 
 export function OscillatingHeadline({ items = phrases, intervalMs = 3000 }) {
